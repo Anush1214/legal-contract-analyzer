@@ -322,10 +322,3 @@ http://127.0.0.1:8000
 
 ---
 
-## ⚖️ Legal Disclaimer & License
-
-### Disclaimer
-> **IMPORTANT**: This application is provided for **academic research, informational, and educational purposes only**. It does not constitute formal legal advice, representation, or an attorney-client relationship. Users should always consult qualified legal counsel in the relevant jurisdiction for official contract drafting, negotiation, and dispute resolution.
-
-### License
-Distributed under the **MIT License**. See `LICENSE` for more information.
