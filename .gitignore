@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
+.env
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ChromaDB & Uploads
+chroma_db/
+uploads/*
+!uploads/.gitkeep
+sample_data/*
+!sample_data/.gitkeep
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

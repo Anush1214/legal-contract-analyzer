@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Contract Analyzer</title>
+  <meta name="description" content="AI Legal Contract Analyzer with conversational RAG intelligence, clause explorer, risk auditing, and contract comparison.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <div class="chatgpt-layout">
+    <!-- Left Sidebar (Collapsible) -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Top Action in Sidebar -->
+      <div class="sidebar-top">
+        <div class="sidebar-brand-row">
+          <div class="brand-badge">
+            <svg class="chatgpt-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span class="brand-title">Legal Analyzer</span>
+          </div>
+          <button id="btnToggleSidebar" class="icon-btn-ghost" title="Collapse sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </button>
+        </div>
+
+        <button id="btnNewChat" class="sidebar-btn-new">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>New inquiry</span>
+        </button>
+
+        <div class="sidebar-nav-items">
+          <button class="sidebar-nav-item active" data-view="chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Contract Chat</span>
+          </button>
+          <button class="sidebar-nav-item" data-view="clauses">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Clause Explorer</span>
+          </button>
+          <button class="sidebar-nav-item" data-view="risks">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Risk Scanner</span>
+          </button>
+          <button class="sidebar-nav-item" data-view="compare">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="18" rx="1"></rect>
+            </svg>
+            <span>Compare Contracts</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Middle: Contracts List / History -->
+      <div class="sidebar-contracts-section">
+        <div class="sidebar-section-header">
+          <span>Active Contracts</span>
+          <button id="btnSidebarLoadSamples" class="text-btn-accent" title="Load sample agreements">Load Samples</button>
+        </div>
+        <div id="sidebarContractsList" class="sidebar-contracts-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Bottom Sidebar Menu -->
+      <div class="sidebar-bottom">
+        <button id="btnSidebarUpload" class="sidebar-footer-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span>Upload Contract PDF</span>
+        </button>
+        <button id="btnSidebarSettings" class="sidebar-footer-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Chat / View Area -->
+    <main class="main-chat-container">
+      <!-- Top Minimal Header with Model Selector -->
+      <header class="top-nav">
+        <div class="top-nav-left">
+          <button id="btnOpenSidebarMobile" class="icon-btn-ghost mobile-only" title="Open sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          
+          <div class="model-dropdown-trigger" id="modelDropdownTrigger">
+            <span class="model-name">Legal Analyzer <span class="model-version">3.7 Flash</span></span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+
+          <div class="active-contract-pill" id="activeContractPill">
+            <span class="pill-dot"></span>
+            <span id="activeContractLabel" class="pill-text">Select a Contract</span>
+          </div>
+        </div>
+
+        <div class="top-nav-right">
+          <button id="btnQuickUpload" class="top-pill-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Upload PDF</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: Chat Interface -->
+      <div id="view-chat" class="view-panel active">
+        <!-- Message History / Feed -->
+        <div class="chat-scroll-area" id="chatScrollArea">
+          <!-- Initial Center "Where should we begin?" Landing -->
+          <div class="chat-hero-landing" id="chatHeroLanding">
+            <h1 class="hero-title">Where should we begin?</h1>
+
+            <!-- Quick Action Chips Under Search Box -->
+            <div class="quick-suggestion-row">
+              <button class="suggestion-chip" data-query="What are my obligations if I want to terminate this contract early?">
+                What are my obligations if I terminate early?
+              </button>
+              <button class="suggestion-chip" data-query="Are there any non-compete clauses? What do they cover?">
+                Are there non-compete clauses?
+              </button>
+              <button class="suggestion-chip" data-query="Flag any clauses that are unusual or particularly risky">
+                Flag unusual or risky clauses
+              </button>
+              <button class="suggestion-chip" data-query="What is the limitation of liability and are damages capped?">
+                What is the limitation of liability?
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Conversation List -->
+          <div class="conversation-feed" id="conversationFeed"></div>
+        </div>
+
+        <!-- Sticky Floating Input Area (ChatGPT Style) -->
+        <div class="input-floating-bar-wrapper">
+          <form id="chatForm" class="chatgpt-input-box">
+            <!-- Plus/Attachment Button -->
+            <button type="button" id="btnAttachFile" class="input-action-btn" title="Upload contract PDF">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+
+            <!-- Auto-expanding Textarea -->
+            <textarea id="chatInput" placeholder="Ask anything about the contract..." rows="1"></textarea>
+
+            <!-- Right Buttons: Mic (visual) + Send Arrow -->
+            <div class="input-actions-right">
+              <button type="button" class="input-action-btn mic-btn" title="Voice dictation">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </button>
+
+              <button type="submit" id="btnSendChat" class="btn-send-circle" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </form>
+
+          <div class="input-disclaimer">
+            Legal Analyzer uses Gemini 3.7 Flash & ChromaDB RAG. Always verify critical legal interpretations with a qualified attorney.
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Clause Explorer -->
+      <div id="view-clauses" class="view-panel">
+        <div class="inner-view-container">
+          <div class="view-header">
+            <h2>Clause Explorer & Plain English</h2>
+            <p>Inspect extracted contract clauses with side-by-side plain-English translations and risk indicators.</p>
+          </div>
+
+          <div class="clause-controls-bar">
+            <div class="search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="clauseSearchInput" placeholder="Filter clauses (termination, liability, indemnification)...">
+            </div>
+            <div class="filter-chips-row" id="categoryFilters"></div>
+          </div>
+
+          <div class="clause-split-layout">
+            <div class="clause-list" id="clauseListContainer"></div>
+            <div class="clause-detail-panel" id="clauseDetailPanel">
+              <div class="empty-selection-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <h3>Select a clause</h3>
+                <p>Click any clause from the list on the left to read its plain-English explanation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Risk Scanner -->
+      <div id="view-risks" class="view-panel">
+        <div class="inner-view-container">
+          <div class="view-header flex-between">
+            <div>
+              <h2>Automated Risk Scanner</h2>
+              <p>Detects one-sided provisions, unlimited liabilities, and restrictive clauses.</p>
+            </div>
+            <button id="btnTriggerRiskScan" class="btn-primary-pill">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Scan Contract Now</span>
+            </button>
+          </div>
+
+          <div class="risk-stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Contract Risk Score</div>
+              <div class="stat-num-row">
+                <span id="riskScoreVal" class="stat-hero-num">--</span>
+                <span class="stat-total">/100</span>
+              </div>
+              <span id="riskScoreLabel" class="status-badge badge-neutral">Awaiting scan</span>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">High Severity Risks</div>
+              <div id="highRiskCount" class="stat-hero-num text-red">0</div>
+              <span class="stat-desc">Uncapped/unilateral terms</span>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Moderate Concerns</div>
+              <div id="medRiskCount" class="stat-hero-num text-yellow">0</div>
+              <span class="stat-desc">Restrictive/renewal terms</span>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Total Clauses Parsed</div>
+              <div id="totalClausesCount" class="stat-hero-num text-blue">0</div>
+              <span class="stat-desc">Extracted via pdfplumber</span>
+            </div>
+          </div>
+
+          <div id="riskExecutiveSummaryCard" class="chatgpt-card" style="display: none;">
+            <div class="card-headline">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Executive Risk Summary</span>
+            </div>
+            <div id="riskExecutiveSummaryText" class="card-body markdown-body"></div>
+          </div>
+
+          <div class="flagged-section">
+            <h3 class="sub-headline">Flagged Clauses</h3>
+            <div id="flaggedClausesList" class="flagged-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Compare Contracts -->
+      <div id="view-compare" class="view-panel">
+        <div class="inner-view-container">
+          <div class="view-header">
+            <h2>Side-by-Side Contract Comparison</h2>
+            <p>Compare clauses across two contracts to spot discrepancies, obligations, and risk balances.</p>
+          </div>
+
+          <div class="compare-select-card">
+            <div class="compare-row">
+              <div class="compare-field">
+                <label for="compareContractA">Contract A (Baseline):</label>
+                <select id="compareContractA" class="custom-select"></select>
+              </div>
+              <span class="vs-text">VS</span>
+              <div class="compare-field">
+                <label for="compareContractB">Contract B (Comparison):</label>
+                <select id="compareContractB" class="custom-select"></select>
+              </div>
+              <button id="btnRunComparison" class="btn-primary-pill">
+                Compare Side-by-Side
+              </button>
+            </div>
+          </div>
+
+          <div id="compareSummaryCard" class="chatgpt-card" style="display: none;">
+            <div class="card-headline">Comparative Assessment</div>
+            <div id="compareSummaryText" class="card-body markdown-body"></div>
+          </div>
+
+          <div id="compareResultsGrid" class="comparison-cards-flow"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-backdrop">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Upload Legal Contract (PDF)</h3>
+          <button class="modal-close" id="btnCloseUploadModal">&times;</button>
+        </div>
+        <div class="modal-content">
+          <div id="dropZone" class="upload-area">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p class="upload-title">Drop PDF contract here or click to browse</p>
+            <span class="upload-sub">Selectable PDF legal agreements (max 25MB)</span>
+            <input type="file" id="pdfFileInput" accept="application/pdf" style="display: none;">
+          </div>
+
+          <div id="uploadProgressContainer" class="progress-wrap" style="display: none;">
+            <div class="progress-track">
+              <div id="uploadProgressBar" class="progress-fill"></div>
+            </div>
+            <span id="uploadProgressLabel" class="progress-txt">Parsing text and indexing clauses into ChromaDB...</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="btnCancelUpload" class="btn-ghost">Cancel</button>
+          <button id="btnTriggerUpload" class="btn-solid" disabled>Index Contract</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-backdrop">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Settings & Model Configuration</h3>
+          <button class="modal-close" id="btnCloseSettingsModal">&times;</button>
+        </div>
+        <div class="modal-content">
+          <div class="form-row">
+            <label for="inputApiKey">Gemini API Key:</label>
+            <div class="input-with-action">
+              <input type="password" id="inputApiKey" placeholder="Enter your Gemini API key..." class="chatgpt-text-input">
+              <button type="button" id="btnToggleKeyVisibility" class="btn-ghost-sm">👁️</button>
+            </div>
+            <small class="helper-txt">Your key is stored securely in .env and used directly with Gemini 3.7 Flash.</small>
+          </div>
+
+          <div class="status-summary-box">
+            <div class="summary-line">
+              <span>Status:</span>
+              <strong id="configStatusLabel" class="text-green">Active</strong>
+            </div>
+            <div class="summary-line">
+              <span>Model:</span>
+              <code>gemini-3.7-flash</code>
+            </div>
+            <div class="summary-line">
+              <span>Vector Database:</span>
+              <code>ChromaDB (Persistent)</code>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="btnCloseSettings" class="btn-ghost">Close</button>
+          <button id="btnSaveApiKey" class="btn-solid">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast">
+      <span id="toastIcon">ℹ️</span>
+      <span id="toastMsg">Notification</span>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
