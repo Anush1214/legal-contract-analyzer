@@ -67,6 +67,14 @@
             </svg>
             <span>Compare Contracts</span>
           </button>
+          <button class="sidebar-nav-item" data-view="benchmark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Research Benchmark</span>
+          </button>
         </div>
       </div>
 
@@ -115,10 +123,17 @@
           </button>
           
           <div class="model-dropdown-trigger" id="modelDropdownTrigger">
-            <span class="model-name">Legal Analyzer <span class="model-version">3.7 Flash</span></span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
+            <span class="model-name">Legal Analyzer <span class="model-version">Gemini 3.6</span></span>
+          </div>
+
+          <!-- RAG Pipeline Architecture Selector -->
+          <div class="rag-pipeline-picker" id="ragPipelinePicker">
+            <span class="pipeline-label">Architecture:</span>
+            <div class="pipeline-chips">
+              <button type="button" class="pipeline-chip active" data-v="v1" title="Version 1: Fixed Dense RAG Baseline (ChromaDB Cosine)">V1 Dense</button>
+              <button type="button" class="pipeline-chip" data-v="v2" title="Version 2: Hybrid BM25 + Dense + Cross-Encoder Reranker">V2 Hybrid</button>
+              <button type="button" class="pipeline-chip" data-v="v3" title="Version 3: Controlled Agentic Multi-Step RAG">V3 Agentic</button>
+            </div>
           </div>
 
           <div class="active-contract-pill" id="activeContractPill">
@@ -333,6 +348,58 @@
           </div>
 
           <div id="compareResultsGrid" class="comparison-cards-flow"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: Research Benchmark Dashboard -->
+      <div id="view-benchmark" class="view-panel">
+        <div class="inner-view-container">
+          <div class="view-header flex-between">
+            <div>
+              <h2>Information Retrieval Research Benchmark</h2>
+              <p>Standardized evaluation protocol comparing V1, V2A, V2B, V2C, and V3 across IR & system metrics on identical ground-truth queries.</p>
+            </div>
+            <button id="btnRefreshBenchmark" class="btn-primary-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              <span>Reload Benchmark</span>
+            </button>
+          </div>
+
+          <!-- Live Benchmark Table Card -->
+          <div class="benchmark-container-card">
+            <div class="benchmark-card-header">
+              <span class="headline-title">Evaluation Summary Table</span>
+              <span id="benchmarkStatusBadge" class="status-badge badge-neutral">Checking status...</span>
+            </div>
+            <div id="benchmarkTableWrapper" class="benchmark-table-box">
+              <div style="padding: 24px; text-align: center; color: var(--text-muted);">
+                Loading benchmark results...
+              </div>
+            </div>
+          </div>
+
+          <!-- Hypotheses Grid -->
+          <div class="research-hypotheses-grid">
+            <div class="hypothesis-card">
+              <div class="hypo-tag">H1: Lexical Complementarity</div>
+              <h4>Does BM25 add value for exact legal terms?</h4>
+              <p>Evaluates whether lexical n-gram matching recovers specific financial thresholds ($50), percentages (100%), and statutory references (§27) that semantic dense embeddings may dilute.</p>
+            </div>
+            <div class="hypothesis-card">
+              <div class="hypo-tag">H2: Second-Stage Reranking</div>
+              <h4>Does Cross-Encoder joint scoring improve MRR?</h4>
+              <p>Evaluates whether joint cross-attention over (query, candidate) pairs correctly elevates the true ground-truth clause to Rank 1 compared with unweighted bi-encoder similarity.</p>
+            </div>
+            <div class="hypothesis-card">
+              <div class="hypo-tag">H3: Controlled Agentic Tradeoffs</div>
+              <h4>What is the cost of Agentic flexibility?</h4>
+              <p>Measures multi-source legal research capability against latency overhead, tool invocation frequency, and token expenditure under bounded step limits.</p>
+            </div>
+          </div>
         </div>
       </div>
     </main>

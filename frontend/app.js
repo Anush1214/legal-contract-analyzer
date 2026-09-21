@@ -11,6 +11,7 @@ const state = {
   searchQuery: '',
   systemConfig: null,
   currentView: 'chat',
+  activeRagVersion: 'v1',
   chatHistory: []
 };
 
@@ -204,6 +205,22 @@ function setupEventListeners() {
   elements.btnToggleKeyVisibility.addEventListener('click', () => {
     elements.inputApiKey.type = elements.inputApiKey.type === 'password' ? 'text' : 'password';
   });
+
+  // RAG Pipeline Architecture Chips
+  document.querySelectorAll('.pipeline-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.pipeline-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.activeRagVersion = chip.getAttribute('data-v') || 'v1';
+      showToast(`Active Architecture: ${chip.textContent}`, '⚡');
+    });
+  });
+
+  // Benchmark reload button
+  const btnRefreshBench = document.getElementById('btnRefreshBenchmark');
+  if (btnRefreshBench) {
+    btnRefreshBench.addEventListener('click', loadBenchmarkResults);
+  }
 }
 
 function switchView(viewName) {
@@ -217,6 +234,9 @@ function switchView(viewName) {
 
   if (viewName === 'clauses' && state.activeClauses.length === 0 && state.activeContract) {
     loadActiveContractClauses();
+  }
+  if (viewName === 'benchmark') {
+    loadBenchmarkResults();
   }
 }
 
@@ -367,7 +387,8 @@ async function handleSendChat() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question: question,
-        contract_name: state.activeContract
+        contract_name: state.activeContract,
+        version: state.activeRagVersion
       })
     });
 
@@ -377,7 +398,7 @@ async function handleSendChat() {
     }
 
     const data = await res.json();
-    updateAssistantMessage(assistantBubble, data.answer, data.clauses_referenced);
+    updateAssistantMessage(assistantBubble, data);
   } catch (err) {
     assistantBubble.querySelector('.chat-assistant-content').innerHTML = `
       <p style="color: var(--accent-red);">Error analyzing query: ${err.message}</p>
@@ -417,8 +438,18 @@ function appendAssistantLoading() {
   return turn;
 }
 
-function updateAssistantMessage(turnElement, markdown, clauses) {
+function updateAssistantMessage(turnElement, data) {
+  const markdown = data.answer || '';
+  const clauses = data.clauses_referenced || [];
+  const version = (data.version || 'v1').toUpperCase();
+  const retrieval = data.retrieval || {};
+  const system = data.system || {};
+  const trace = data.agent_trace || null;
+  const verification = data.verification || null;
+
   const html = renderMarkdown(markdown);
+
+  // Citations
   let citationsHtml = '';
   if (clauses && clauses.length > 0) {
     citationsHtml = `
@@ -429,11 +460,153 @@ function updateAssistantMessage(turnElement, markdown, clauses) {
     `;
   }
 
+  // Verification Badge
+  let verifHtml = '';
+  if (verification) {
+    const isV = verification.is_verified;
+    const prec = Math.round((verification.citation_precision || 1.0) * 100);
+    verifHtml = `
+      <span class="status-badge ${isV ? 'badge-low' : 'badge-high'}" style="font-size: 11px;">
+        ${isV ? '✅ Citations Grounded' : '⚠️ Unverified Citation'} (${prec}%)
+      </span>
+    `;
+  }
+
+  // Retrieval & Trace Inspector Box
+  const retResults = retrieval.results || [];
+  const latencyMs = system.total_latency ? Math.round(system.total_latency * 1000) : (retrieval.retrieval_latency ? Math.round(retrieval.retrieval_latency * 1000) : null);
+
+  let inspectorHtml = `
+    <div class="retrieval-metadata-box">
+      <div class="retrieval-meta-header" onclick="this.nextElementSibling.classList.toggle('hidden');">
+        <div class="retrieval-meta-tags">
+          <span class="retrieval-method-tag">${escapeHtml(version)} • ${escapeHtml(retrieval.method || 'retrieval')}</span>
+          ${verifHtml}
+        </div>
+        <div style="color: var(--text-muted); font-size: 11px; font-family: var(--font-mono);">
+          ${latencyMs ? `${latencyMs}ms` : ''} ▾
+        </div>
+      </div>
+      <div class="retrieval-meta-body">
+  `;
+
+  if (trace && trace.tool_calls && trace.tool_calls.length > 0) {
+    inspectorHtml += `
+      <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Agent Tool Trace (${trace.total_steps} steps):</div>
+      <div class="agent-steps-timeline">
+        ${trace.tool_calls.map(tc => `
+          <div class="agent-step-item">
+            <span class="agent-step-num">${tc.step}</span>
+            <span style="font-family: var(--font-mono); color: var(--accent-blue);">${escapeHtml(tc.tool_name)}</span>
+            <span style="color: var(--text-muted);">(${escapeHtml(tc.output_summary)})</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  if (retResults.length > 0) {
+    inspectorHtml += `
+      <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 6px;">Retrieved Evidence (${retResults.length} clauses):</div>
+      ${retResults.slice(0, 4).map(r => `
+        <div class="evidence-clause-pill">
+          <div style="font-weight: 600; color: #FFFFFF;">Clause ${r.clause_number || '?'}: ${escapeHtml(r.title || '')}</div>
+          <div class="evidence-scores-row">
+            <span>Score: ${r.retrieval_score != null ? r.retrieval_score.toFixed(3) : '--'}</span>
+            ${r.rerank_score != null ? `<span style="color: var(--accent-green);">Rerank: ${r.rerank_score.toFixed(3)}</span>` : ''}
+            <span>Page: ~${r.page || 1}</span>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  inspectorHtml += `
+      </div>
+    </div>
+  `;
+
   turnElement.querySelector('.chat-assistant-content').innerHTML = `
     <div class="markdown-body">${html}</div>
     ${citationsHtml}
+    ${inspectorHtml}
   `;
   scrollToBottom();
+}
+
+async function loadBenchmarkResults() {
+  const wrapper = document.getElementById('benchmarkTableWrapper');
+  const badge = document.getElementById('benchmarkStatusBadge');
+  if (!wrapper) return;
+
+  wrapper.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">Fetching evaluation data...</div>';
+
+  try {
+    const res = await fetch('/api/benchmark/results');
+    const data = await res.json();
+
+    if (!data.has_results || !data.summary) {
+      if (badge) {
+        badge.className = 'status-badge badge-neutral';
+        badge.textContent = 'Not Evaluated';
+      }
+      wrapper.innerHTML = `
+        <div style="padding: 30px; text-align: center; color: var(--text-muted);">
+          <p style="margin-bottom: 8px; font-size: 14px;"><strong>No evaluation run recorded yet.</strong></p>
+          <p style="font-size: 12px;">Run the benchmark runner script to evaluate all 5 systems on the synthetic dataset:</p>
+          <code style="background: var(--bg-main); padding: 6px 12px; border-radius: 4px; display: inline-block; margin-top: 10px; font-family: var(--font-mono);">
+            python scripts/run_evaluation.py
+          </code>
+        </div>
+      `;
+      return;
+    }
+
+    if (badge) {
+      badge.className = 'status-badge badge-low';
+      badge.textContent = `Evaluated (${data.timestamp || 'Recent'})`;
+    }
+
+    const summary = data.summary;
+    let tableRows = '';
+
+    for (const [sysName, m] of Object.entries(summary)) {
+      tableRows += `
+        <tr>
+          <td class="sys-name">${escapeHtml(sysName)}</td>
+          <td>${m.recall_at_4 != null ? m.recall_at_4.toFixed(4) : '--'}</td>
+          <td>${m.recall_at_8 != null ? m.recall_at_8.toFixed(4) : '--'}</td>
+          <td>${m.precision_at_4 != null ? m.precision_at_4.toFixed(4) : '--'}</td>
+          <td>${m.mrr != null ? m.mrr.toFixed(4) : '--'}</td>
+          <td>${m.ndcg_at_4 != null ? m.ndcg_at_4.toFixed(4) : '--'}</td>
+          <td>${m.avg_latency_ms != null ? m.avg_latency_ms.toFixed(1) : '--'} ms</td>
+          <td>${m.avg_tool_calls != null ? m.avg_tool_calls.toFixed(1) : '0.0'}</td>
+        </tr>
+      `;
+    }
+
+    wrapper.innerHTML = `
+      <table class="benchmark-table">
+        <thead>
+          <tr>
+            <th>Architecture</th>
+            <th>Recall@4</th>
+            <th>Recall@8</th>
+            <th>Precision@4</th>
+            <th>MRR</th>
+            <th>nDCG@4</th>
+            <th>Latency (ms)</th>
+            <th>Avg Tool Calls</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    wrapper.innerHTML = `<div style="padding: 20px; color: var(--accent-red);">Error loading benchmark results: ${err.message}</div>`;
+  }
 }
 
 function scrollToBottom() {
