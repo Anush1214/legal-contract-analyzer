@@ -1,141 +1,283 @@
-import os
+import time
 import json
-import requests
+import logging
 from typing import Dict, Any, List, Optional
-from backend.config import get_gemini_api_key, LLM_MODEL
-from backend.vector_store import query_clauses, get_contract_clauses
+from pydantic import BaseModel, Field, ValidationError
+
+from backend.config import (
+    RAG_VERSION,
+    RAG_TOP_K,
+    RAG_MIN_RELEVANCE_SCORE,
+    FINAL_TOP_K
+)
+from backend.retrieval.dense import DenseRetriever
+from backend.retrieval.bm25 import BM25Retriever
+from backend.retrieval.hybrid import HybridRetriever
+from backend.retrieval.base import RetrievalResult
+from backend.generation.prompts import build_grounded_rag_prompt
+from backend.generation.llm import call_gemini
 from backend.legal_sources import aggregate_legal_research, search_sec_edgar_benchmarks
 
-LEGAL_SYSTEM_PROMPT = """You are an expert international and corporate legal assistant helping lawyers and non-lawyers evaluate contracts.
-You possess deep knowledge of:
-1. United States Law (UCC, Delaware Corporate Law, Restatements of Contracts, Federal Court precedents)
-2. Indian Law (Indian Contract Act, 1872 - especially Section 27 on void non-competes and Sections 73/74 on liquidated damages vs penalties, Supreme Court rulings)
-3. United Kingdom Law (Unfair Contract Terms Act 1977, Consumer Rights Act, Cavendish penalty doctrine)
-4. Commercial Market Standards (SEC EDGAR Exhibit 10 benchmarks)
+logger = logging.getLogger("legal_engine")
 
-Your guidelines:
-- Explain legal terms and business implications in clear, plain English.
-- Flag asymmetric, unilateral, or unconscionable clauses with precision.
-- Cross-reference applicable statutes and case precedents (e.g., Section 27 of the Indian Contract Act or UCC § 2-719 or CourtListener findings when relevant).
-- Always cite the specific contract clauses your answer relies upon.
-- Format responses cleanly with markdown headers, bold highlights, and bullet points."""
+# Global retrievers for engine operations
+dense_engine = DenseRetriever()
+bm25_engine = BM25Retriever()
+hybrid_engine = HybridRetriever(dense_retriever=dense_engine, bm25_retriever=bm25_engine)
 
-def _call_gemini_llm(prompt: str, system_instruction: str = LEGAL_SYSTEM_PROMPT, max_retries: int = 2) -> Optional[str]:
-    """Execute dynamic inference via Gemini 3.7 Flash."""
-    api_key = get_gemini_api_key()
-    if not api_key:
-        return None
-        
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{LLM_MODEL}:generateContent?key={api_key}"
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": f"System Directive:\n{system_instruction}\n\nTask & Context:\n{prompt}"}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.2,
-            "maxOutputTokens": 2048
-        }
-    }
+# -------------------------------------------------------------------------
+# Pydantic Schemas for Structured Output Validation
+# -------------------------------------------------------------------------
+class FlaggedClauseSchema(BaseModel):
+    clause_number: int
+    title: str
+    category: str
+    severity: str
+    concerns: List[str]
+    statutory_note: Optional[str] = None
+    text: str
 
-    for attempt in range(max_retries):
-        try:
-            resp = requests.post(url, json=payload, timeout=12)
-            if resp.status_code == 200:
-                data = resp.json()
-                candidates = data.get("candidates", [])
-                if candidates and "content" in candidates[0]:
-                    parts = candidates[0]["content"].get("parts", [])
-                    if parts and "text" in parts[0]:
-                        return parts[0]["text"]
-            elif resp.status_code in [429, 503]:
-                # Server busy, short retry
-                continue
-        except Exception:
-            pass
-            
-    return None
+class RiskAuditSchema(BaseModel):
+    risk_score: int = Field(ge=0, le=100)
+    overall_status: str
+    summary: str
+    flagged_clauses: List[FlaggedClauseSchema] = Field(default_factory=list)
 
-def analyze_contract(question: str, contract_name: Optional[str] = None) -> Dict[str, Any]:
+# -------------------------------------------------------------------------
+# VERSION 1: Fixed Dense RAG Baseline
+# -------------------------------------------------------------------------
+def analyze_contract_v1(
+    question: str,
+    contract_name: Optional[str] = None,
+    top_k: int = RAG_TOP_K,
+    min_score: float = RAG_MIN_RELEVANCE_SCORE
+) -> Dict[str, Any]:
     """
-    RAG Analysis Pipeline:
-    1. Retrieve relevant clauses from ChromaDB vector store.
-    2. Retrieve relevant legal precedents & statutes (CourtListener, IndiaCode, SEC EDGAR, UK UCTA).
-    3. Pass consolidated context to Gemini 3.7 Flash to generate dynamic analysis.
+    Version 1: Fixed Dense RAG Baseline.
+    Architecture:
+      Query -> Query Embedding -> ChromaDB Dense Cosine Retrieval
+      -> Confidence Threshold Check -> Normalized Evidence -> Gemini 3.6 Flash -> Grounded Answer
     """
-    # 1. Vector Search for Contract Clauses
-    results = query_clauses(question, contract_name=contract_name, n_results=4)
-    docs = results.get("documents", [[]])[0]
-    metas = results.get("metadatas", [[]])[0]
+    t_start = time.time()
 
-    if not docs:
-        return {
-            "answer": "No indexed clauses matched your inquiry. Please ensure you have uploaded and selected a contract.",
-            "clauses_referenced": [],
-            "legal_precedents": []
-        }
-
-    contract_context = "\n\n---\n\n".join(
-        [f"Clause {m.get('clause_number', '?')} ({m.get('title', 'Section')}):\n{d}" for d, m in zip(docs, metas)]
+    # 1. Dense Retrieval
+    t_ret_start = time.time()
+    retrieved: List[RetrievalResult] = dense_engine.retrieve(
+        query=question,
+        contract_name=contract_name,
+        top_k=top_k
     )
-    sources = [
-        f"Clause {s.get('clause_number', '?')} from {s.get('contract', 'Unknown')}"
-        for s in metas
-    ]
+    retrieval_latency = time.time() - t_ret_start
 
-    # 2. External Legal Research Retrieval
-    external_research = aggregate_legal_research(question, docs[0] if docs else "")
+    # 2. Confidence Threshold & Abstention Check
+    top_score = retrieved[0].retrieval_score if retrieved else 0.0
+    if not retrieved or top_score < min_score:
+        reason = f"Top retrieval similarity score ({top_score:.3f}) fell below minimum confidence threshold ({min_score:.3f})."
+        return {
+            "version": "v1",
+            "answer": (
+                f"### Insufficient Evidence Found\n\n"
+                f"I could not find sufficiently relevant clauses in '{contract_name or 'the contract'}' to answer this question reliably.\n\n"
+                f"> **System Diagnostic**: {reason}\n\n"
+                f"*Please verify that the correct contract is selected and contains clauses addressing this specific topic.*"
+            ),
+            "clauses_referenced": [],
+            "legal_precedents": [],
+            "retrieval": {
+                "method": "dense",
+                "results": [r.to_dict() for r in retrieved],
+                "retrieval_latency": round(retrieval_latency, 4),
+                "top_score": round(top_score, 4),
+                "abstained": True,
+                "abstention_reason": reason
+            },
+            "system": {
+                "total_latency": round(time.time() - t_start, 4),
+                "llm_latency": 0.0
+            }
+        }
+
+    # 3. External Legal Knowledge Aggregation
+    sample_text = retrieved[0].text if retrieved else ""
+    external_research = aggregate_legal_research(question, sample_text)
     research_context_parts = []
     for ref in external_research:
         research_context_parts.append(f"• [{ref.get('jurisdiction', 'Legal Source')}] {ref.get('source', '')}: {ref.get('summary', ref.get('industry_standard', ''))}")
-    
-    external_legal_context = "\n".join(research_context_parts) if research_context_parts else "No specific statutory references retrieved."
+    external_context = "\n".join(research_context_parts) if research_context_parts else ""
 
-    # 3. Dynamic Gemini Prompt
-    prompt = f"""You are analyzing the legal agreement '{contract_name or 'Contract'}'.
+    # 4. Prompt Assembly
+    prompt = build_grounded_rag_prompt(
+        question=question,
+        contract_name=contract_name or "Contract",
+        retrieved_clauses=retrieved,
+        external_legal_context=external_context
+    )
 
-RELEVANT CONTRACT CLAUSES (Retrieved via ChromaDB RAG):
-{contract_context}
-
-EXTERNAL STATUTORY & PRECEDENT CONTEXT (Retrieved from CourtListener, Indian Contract Act 1872, SEC EDGAR, UK UCTA):
-{external_legal_context}
-
-USER QUESTION:
-{question}
-
-INSTRUCTIONS:
-1. Provide a comprehensive plain-English analysis addressing the question directly.
-2. If relevant, compare enforceability under US Law and Indian Law (e.g., Section 27 regarding non-competes, or Section 74 regarding liquidated damages vs penalties).
-3. Benchmark against standard commercial practices (e.g., SEC EDGAR norms).
-4. Explicitly cite which clauses in the contract contain these obligations and flag any severe red flags or one-sided risks.
-5. Do not use generic boilerplate; ground your response in the provided contract clauses and legal precedents."""
-
-    llm_output = _call_gemini_llm(prompt)
+    # 5. LLM Synthesis
+    llm_output, llm_latency, token_usage = call_gemini(prompt)
 
     if not llm_output:
-        # Resilient synthesis if network interrupted
+        # Graceful analytical fallback if API key absent / offline
         llm_output = (
-            f"### Legal Analysis: *\"{question}\"*\n\n"
+            f"### Legal Analysis (Analytical Mode): *\"{question}\"*\n\n"
             f"**Key Findings from {contract_name or 'the Contract'}:**\n"
-            + "\n".join([f"- **Clause {m.get('clause_number')} ({m.get('title', '')})**: {d[:200]}..." for d, m in zip(docs, metas)])
-            + f"\n\n**Applicable Legal Precedents & Principles:**\n{external_legal_context}\n\n"
-            + "> ⚖️ *Recommendation: Consult legal counsel for jurisdiction-specific enforcement.*"
+            + "\n".join([f"- **Clause {c.clause_number} ({c.title})** [Similarity: {c.retrieval_score:.2f}]: {c.text[:220]}..." for c in retrieved])
+            + (f"\n\n**Applicable Legal Benchmarks & Statutes:**\n{external_context}\n" if external_context else "")
+            + "\n> ⚖️ *Recommendation: Consult legal counsel for jurisdiction-specific advice.*"
         )
 
+    sources = [f"Clause {c.clause_number} from {c.contract_name}" for c in retrieved]
+
     return {
+        "version": "v1",
         "answer": llm_output,
         "clauses_referenced": sources,
-        "legal_precedents": [ref.get("source") for ref in external_research if ref.get("source")]
+        "legal_precedents": [ref.get("source") for ref in external_research if ref.get("source")],
+        "retrieval": {
+            "method": "dense",
+            "results": [r.to_dict() for r in retrieved],
+            "retrieval_latency": round(retrieval_latency, 4),
+            "top_score": round(top_score, 4),
+            "abstained": False
+        },
+        "system": {
+            "total_latency": round(time.time() - t_start, 4),
+            "llm_latency": round(llm_latency, 4),
+            "token_usage": token_usage
+        }
     }
 
+# -------------------------------------------------------------------------
+# VERSION 2: Hybrid Retrieval + Reranking Pipeline
+# -------------------------------------------------------------------------
+def analyze_contract_v2(
+    question: str,
+    contract_name: Optional[str] = None,
+    top_k: int = FINAL_TOP_K,
+    use_reranker: bool = True
+) -> Dict[str, Any]:
+    """
+    Version 2: Hybrid Retrieval (BM25 + Dense) + Cross-Encoder Reranking.
+    Architecture:
+      Query -> [BM25 Candidates] + [Dense Candidates] -> Reciprocal Rank Fusion
+      -> Candidate Pool -> Cross-Encoder Joint Reranker -> Top-K -> Gemini 3.6 Flash
+    """
+    t_start = time.time()
+
+    # 1. Hybrid Retrieval & Reranking
+    t_ret_start = time.time()
+    retrieved: List[RetrievalResult] = hybrid_engine.retrieve(
+        query=question,
+        contract_name=contract_name,
+        top_k=top_k,
+        use_reranker=use_reranker
+    )
+    retrieval_latency = time.time() - t_ret_start
+
+    if not retrieved:
+        return {
+            "version": "v2",
+            "answer": f"No clauses matched your inquiry in '{contract_name or 'the contract'}'.",
+            "clauses_referenced": [],
+            "legal_precedents": [],
+            "retrieval": {
+                "method": "hybrid_reranked" if use_reranker else "hybrid_fused",
+                "results": [],
+                "retrieval_latency": round(retrieval_latency, 4),
+                "abstained": True
+            },
+            "system": {
+                "total_latency": round(time.time() - t_start, 4),
+                "llm_latency": 0.0
+            }
+        }
+
+    # 2. External Legal Knowledge
+    sample_text = retrieved[0].text if retrieved else ""
+    external_research = aggregate_legal_research(question, sample_text)
+    research_context_parts = []
+    for ref in external_research:
+        research_context_parts.append(f"• [{ref.get('jurisdiction', 'Legal Source')}] {ref.get('source', '')}: {ref.get('summary', ref.get('industry_standard', ''))}")
+    external_context = "\n".join(research_context_parts) if research_context_parts else ""
+
+    # 3. Prompt Assembly
+    prompt = build_grounded_rag_prompt(
+        question=question,
+        contract_name=contract_name or "Contract",
+        retrieved_clauses=retrieved,
+        external_legal_context=external_context
+    )
+
+    # 4. LLM Call
+    llm_output, llm_latency, token_usage = call_gemini(prompt)
+
+    if not llm_output:
+        llm_output = (
+            f"### Hybrid Legal Analysis: *\"{question}\"*\n\n"
+            f"**Key Retrieved Clauses from {contract_name or 'the Contract'}:**\n"
+            + "\n".join([
+                f"- **Clause {c.clause_number} ({c.title})** [RRF: {c.retrieval_score:.3f}"
+                + (f", Rerank: {c.rerank_score:.3f}" if c.rerank_score is not None else "")
+                + f"]: {c.text[:200]}..."
+                for c in retrieved
+            ])
+            + (f"\n\n**Legal Precedents & Principles:**\n{external_context}\n" if external_context else "")
+        )
+
+    sources = [f"Clause {c.clause_number} from {c.contract_name}" for c in retrieved]
+
+    return {
+        "version": "v2",
+        "answer": llm_output,
+        "clauses_referenced": sources,
+        "legal_precedents": [ref.get("source") for ref in external_research if ref.get("source")],
+        "retrieval": {
+            "method": "hybrid_reranked" if use_reranker else "hybrid_fused",
+            "results": [r.to_dict() for r in retrieved],
+            "retrieval_latency": round(retrieval_latency, 4),
+            "abstained": False
+        },
+        "system": {
+            "total_latency": round(time.time() - t_start, 4),
+            "llm_latency": round(llm_latency, 4),
+            "token_usage": token_usage
+        }
+    }
+
+# -------------------------------------------------------------------------
+# Unified Router Dispatcher
+# -------------------------------------------------------------------------
+def analyze_contract(
+    question: str,
+    contract_name: Optional[str] = None,
+    version: Optional[str] = None,
+    **kwargs
+) -> Dict[str, Any]:
+    """
+    Main dispatch endpoint for contract analysis.
+    Supports version="v1" (Dense RAG), version="v2" (Hybrid RAG), and version="v3" (Agentic RAG).
+    """
+    selected_version = (version or RAG_VERSION).lower()
+
+    if selected_version == "v2":
+        return analyze_contract_v2(question, contract_name, **kwargs)
+    elif selected_version == "v3":
+        from backend.agent.orchestrator import run_agent_analysis
+        return run_agent_analysis(question, contract_name, **kwargs)
+    else:
+        # Default to V1 Fixed Dense Baseline
+        return analyze_contract_v1(question, contract_name, **kwargs)
+
+# -------------------------------------------------------------------------
+# Existing Application Workflows (Preserved & Enhanced)
+# -------------------------------------------------------------------------
 def flag_risky_clauses(contract_name: str) -> Dict[str, Any]:
     """
-    Auto-scan contract clauses and generate risk assessment dynamically through Gemini 3.7 Flash.
+    Auto-scan contract clauses and generate risk assessment.
+    Uses Gemini with structured JSON output and formal Pydantic schema validation.
+    Falls back gracefully to heuristic scan on schema failure or network error.
     """
-    clauses = get_contract_clauses(contract_name)
+    clauses = dense_engine.get_all_clauses(contract_name)
     if not clauses:
         return {
             "contract": contract_name,
@@ -146,7 +288,6 @@ def flag_risky_clauses(contract_name: str) -> Dict[str, Any]:
             "flagged_clauses": []
         }
 
-    # Prepare clauses for evaluation
     clauses_digest = "\n\n".join(
         [f"Clause {c['clause_number']} ({c.get('title', '')} | {c.get('category', '')}):\n{c['text']}" for c in clauses]
     )
@@ -157,7 +298,7 @@ Analyze each clause for one-sided terms, uncapped liabilities, unilateral rights
 CONTRACT CLAUSES:
 {clauses_digest}
 
-Respond in valid JSON format with this exact structure:
+Respond in valid JSON format matching this schema:
 {{
   "risk_score": <integer from 0 to 100>,
   "overall_status": "<e.g. High Risk - Major Red Flags Detected | Moderate Risk | Standard Commercial>",
@@ -175,11 +316,13 @@ Respond in valid JSON format with this exact structure:
   ]
 }}"""
 
-    llm_output = _call_gemini_llm(prompt, system_instruction="You are a legal contract audit engine. Output only valid JSON.")
+    llm_output, _, _ = call_gemini(
+        prompt=prompt,
+        system_instruction="You are a legal contract audit engine. Output strictly valid JSON."
+    )
 
     if llm_output:
         try:
-            # Extract json block if wrapped in markdown code fence
             clean_json = llm_output.strip()
             if clean_json.startswith("```json"):
                 clean_json = clean_json[7:]
@@ -187,29 +330,31 @@ Respond in valid JSON format with this exact structure:
                 clean_json = clean_json[3:]
             if clean_json.endswith("```"):
                 clean_json = clean_json[:-3]
-            parsed = json.loads(clean_json.strip())
 
-            flagged = parsed.get("flagged_clauses", [])
-            high_count = sum(1 for f in flagged if f.get("severity") == "HIGH")
-            med_count = sum(1 for f in flagged if f.get("severity") == "MEDIUM")
-            low_count = sum(1 for f in flagged if f.get("severity") == "LOW")
+            parsed_raw = json.loads(clean_json.strip())
+            # Formal Pydantic validation
+            validated = RiskAuditSchema.model_validate(parsed_raw)
+
+            high_count = sum(1 for f in validated.flagged_clauses if f.severity == "HIGH")
+            med_count = sum(1 for f in validated.flagged_clauses if f.severity == "MEDIUM")
+            low_count = sum(1 for f in validated.flagged_clauses if f.severity == "LOW")
 
             return {
                 "contract": contract_name,
                 "total_clauses": len(clauses),
-                "flagged_count": len(flagged),
+                "flagged_count": len(validated.flagged_clauses),
                 "high_count": high_count,
                 "medium_count": med_count,
                 "low_count": low_count,
-                "risk_score": parsed.get("risk_score", 65),
-                "overall_status": parsed.get("overall_status", "Audited"),
-                "summary": parsed.get("summary", "Audit completed via Gemini 3.7 Flash."),
-                "flagged_clauses": flagged
+                "risk_score": validated.risk_score,
+                "overall_status": validated.overall_status,
+                "summary": validated.summary,
+                "flagged_clauses": [f.model_dump() for f in validated.flagged_clauses]
             }
-        except Exception as err:
-            print(f"JSON parse error from LLM: {err}")
+        except (json.JSONDecodeError, ValidationError) as err:
+            logger.warning(f"Risk scan LLM response failed schema validation: {err}. Falling back to rule-based scan.")
 
-    # Fallback to analytical scan
+    # Explicit rule-based analytical fallback
     flagged = []
     for c in clauses:
         t = c["text"].lower()
@@ -247,7 +392,7 @@ Respond in valid JSON format with this exact structure:
         "low_count": len(flagged) - high_count - med_count,
         "risk_score": min(100, (high_count * 25) + (med_count * 10)),
         "overall_status": "High Risk" if high_count > 0 else "Moderate Risk",
-        "summary": f"Audit of {contract_name} identified {len(flagged)} provisions requiring scrutiny.",
+        "summary": f"Audit of {contract_name} identified {len(flagged)} provisions requiring scrutiny (heuristic scan).",
         "flagged_clauses": flagged
     }
 
@@ -268,7 +413,9 @@ Explain:
 2. Who is obligated to do what, and what rights are being waived.
 3. Is it standard or risky? Mention US/Indian legal enforceability if applicable."""
 
-    explanation = _call_gemini_llm(prompt) or f"This clause establishes conditions regarding {clause_text[:120]}."
+    explanation, _, _ = call_gemini(prompt)
+    if not explanation:
+        explanation = f"This clause establishes contractual rights and responsibilities regarding {clause_text[:120]}."
 
     severity = "HIGH" if any(k in clause_text.lower() for k in ["sole discretion", "liquidated damages", "100%", "$50", "2 year", "worldwide"]) else "LOW"
 
@@ -281,9 +428,12 @@ Explain:
     }
 
 def compare_contracts(contract_a: str, contract_b: str, topic: Optional[str] = None) -> Dict[str, Any]:
-    """Compare clauses side-by-side using Gemini 3.7 Flash."""
-    clauses_a = get_contract_clauses(contract_a)
-    clauses_b = get_contract_clauses(contract_b)
+    """
+    Compare clauses side-by-side using semantic alignment across key categories.
+    Pairs clauses between Contract A and Contract B using semantic search.
+    """
+    clauses_a = dense_engine.get_all_clauses(contract_a)
+    clauses_b = dense_engine.get_all_clauses(contract_b)
 
     focus_categories = [
         "Termination & Term",
@@ -297,8 +447,21 @@ def compare_contracts(contract_a: str, contract_b: str, topic: Optional[str] = N
     comp_context_list = []
 
     for cat in focus_categories:
+        # Match clauses by category or semantic query
         match_a = next((c for c in clauses_a if c["category"] == cat), None)
         match_b = next((c for c in clauses_b if c["category"] == cat), None)
+
+        if not match_a and clauses_a:
+            # Semantic search within contract A for this category topic
+            search_res = dense_engine.retrieve(cat, contract_name=contract_a, top_k=1)
+            if search_res and search_res[0].retrieval_score > 0.35:
+                match_a = {"clause_number": search_res[0].clause_number, "text": search_res[0].text}
+
+        if not match_b and clauses_b:
+            # Semantic search within contract B for this category topic
+            search_res = dense_engine.retrieve(cat, contract_name=contract_b, top_k=1)
+            if search_res and search_res[0].retrieval_score > 0.35:
+                match_b = {"clause_number": search_res[0].clause_number, "text": search_res[0].text}
 
         if match_a or match_b:
             text_a = match_a["text"] if match_a else "No explicit clause found."
@@ -314,7 +477,7 @@ def compare_contracts(contract_a: str, contract_b: str, topic: Optional[str] = N
                 "contract_b_clause": match_b["clause_number"] if match_b else None,
                 "contract_b_text": text_b,
                 "contract_b_risk": "HIGH" if any(k in text_b.lower() for k in ["100%", "$50", "2 year", "sole discretion"]) else "LOW",
-                "verdict": f"{contract_b} is generally more mutual and balanced." if "SaaS" in contract_a else "Comparable terms."
+                "verdict": f"{contract_b} is generally more balanced." if "SaaS" in contract_a else "Comparable provisions."
             })
 
     prompt = f"""Compare these two agreements side-by-side across key operational terms:
@@ -329,7 +492,9 @@ Provide an executive comparative verdict:
 2. Detail the major risks in Termination, Liability, and Non-compete terms.
 3. Provide practical negotiation recommendations."""
 
-    verdict = _call_gemini_llm(prompt) or f"Comparison completed between {contract_a} and {contract_b}."
+    verdict, _, _ = call_gemini(prompt)
+    if not verdict:
+        verdict = f"Comparison completed between {contract_a} and {contract_b}."
 
     return {
         "contract_a": contract_a,
