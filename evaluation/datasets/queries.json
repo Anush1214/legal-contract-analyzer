@@ -1,0 +1,144 @@
+{
+  "benchmark_metadata": {
+    "name": "Legal Contract Analyzer Benchmark Suite",
+    "type": "SYNTHETIC / DEMONSTRATION BENCHMARK",
+    "description": "Curated legal domain evaluation queries mapped to exact ground-truth clause IDs across Enterprise SaaS and Consulting agreements.",
+    "version": "1.0.0",
+    "created_at": "2026-09-21",
+    "ground_truth_verified": true
+  },
+  "queries": [
+    {
+      "query_id": "q001",
+      "contract_name": "Enterprise_SaaS_Vendor_Agreement.pdf",
+      "question": "Can the customer terminate the agreement early for convenience without penalty?",
+      "category": "Termination & Term",
+      "relevant_clause_ids": [
+        "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+      ],
+      "relevant_clause_numbers": [4],
+      "notes": "Section 4 prohibits termination for convenience and imposes 100% liquidated damages."
+    },
+    {
+      "query_id": "q002",
+      "contract_name": "Enterprise_SaaS_Vendor_Agreement.pdf",
+      "question": "Are there any post-termination non-compete restrictions, and what is their duration and geographic scope?",
+      "category": "Non-Compete & Restrictive",
+      "relevant_clause_ids": [
+        "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+      ],
+      "relevant_clause_numbers": [9],
+      "notes": "Section 9 imposes a 24-month worldwide restriction on developing similar software."
+    },
+    {
+      "query_id": "q003",
+      "contract_name": "Enterprise_SaaS_Vendor_Agreement.pdf",
+      "question": "What is the maximum aggregate liability cap for the vendor?",
+      "category": "Limitation of Liability",
+      "relevant_clause_ids": [
+        "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+      ],
+      "relevant_clause_numbers": [8],
+      "notes": "Section 8 caps vendor liability to $50 or fees paid in the single preceding month."
+    },
+    {
+      "query_id": "q004",
+      "contract_name": "Enterprise_SaaS_Vendor_Agreement.pdf",
+      "question": "Does the vendor have the right to use customer data to train machine learning models?",
+      "category": "Intellectual Property",
+      "relevant_clause_ids": [
+        "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+      ],
+      "relevant_clause_numbers": [5],
+      "notes": "Section 5 grants vendor perpetual worldwide license to ingest customer data for ML training."
+    },
+    {
+      "query_id": "q005",
+      "contract_name": "Enterprise_SaaS_Vendor_Agreement.pdf",
+      "question": "Does the contract automatically renew, and what is the required notice window for non-renewal?",
+      "category": "Termination & Term",
+      "relevant_clause_ids": [
+        "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+      ],
+      "relevant_clause_numbers": [3],
+      "notes": "Section 3 establishes evergreen 12-month renewals with 90-day certified mail notice."
+    },
+    {
+      "query_id": "q006",
+      "contract_name": "Enterprise_SaaS_Vendor_Agreement.pdf",
+      "question": "Who is required to indemnify whom for third-party intellectual property claims?",
+      "category": "Indemnification",
+      "relevant_clause_ids": [
+        "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+      ],
+      "relevant_clause_numbers": [7],
+      "notes": "Section 7 is unilateral: customer indemnifies vendor for IP infringement."
+    },
+    {
+      "query_id": "q007",
+      "contract_name": "Standard_Consulting_Services_Agreement.pdf",
+      "question": "Can either party terminate this consulting agreement for convenience?",
+      "category": "Termination & Term",
+      "relevant_clause_ids": [
+        "Standard_Consulting_Services_Agreement.pdf_clause_3"
+      ],
+      "relevant_clause_numbers": [3],
+      "notes": "Section 3 allows mutual termination for convenience on 30 days written notice."
+    },
+    {
+      "query_id": "q008",
+      "contract_name": "Standard_Consulting_Services_Agreement.pdf",
+      "question": "Who owns custom software code and designs created specifically for the client?",
+      "category": "Intellectual Property",
+      "relevant_clause_ids": [
+        "Standard_Consulting_Services_Agreement.pdf_clause_4"
+      ],
+      "relevant_clause_numbers": [4],
+      "notes": "Section 4 transfers ownership of deliverables to Client upon full payment."
+    },
+    {
+      "query_id": "q009",
+      "contract_name": "Standard_Consulting_Services_Agreement.pdf",
+      "question": "How is the limitation of liability calculated for consulting services?",
+      "category": "Limitation of Liability",
+      "relevant_clause_ids": [
+        "Standard_Consulting_Services_Agreement.pdf_clause_7"
+      ],
+      "relevant_clause_numbers": [7],
+      "notes": "Section 7 caps mutual liability at total aggregate fees paid in preceding 12 months."
+    },
+    {
+      "query_id": "q010",
+      "contract_name": "Standard_Consulting_Services_Agreement.pdf",
+      "question": "What are the restrictions on hiring or soliciting the consultant's personnel?",
+      "category": "Non-Compete & Restrictive",
+      "relevant_clause_ids": [
+        "Standard_Consulting_Services_Agreement.pdf_clause_8"
+      ],
+      "relevant_clause_numbers": [8],
+      "notes": "Section 8 specifies 12-month mutual non-solicitation, excluding general job postings."
+    },
+    {
+      "query_id": "q011",
+      "contract_name": "Standard_Consulting_Services_Agreement.pdf",
+      "question": "What are the payment terms and invoicing schedule (e.g. Net 30)?",
+      "category": "Fees & Payment",
+      "relevant_clause_ids": [
+        "Standard_Consulting_Services_Agreement.pdf_clause_2"
+      ],
+      "relevant_clause_numbers": [2],
+      "notes": "Section 2 provides Net 30 payment terms and 10-day notice for billing disputes."
+    },
+    {
+      "query_id": "q012",
+      "contract_name": "Standard_Consulting_Services_Agreement.pdf",
+      "question": "Is indemnification mutual or one-sided in this consulting agreement?",
+      "category": "Indemnification",
+      "relevant_clause_ids": [
+        "Standard_Consulting_Services_Agreement.pdf_clause_6"
+      ],
+      "relevant_clause_numbers": [6],
+      "notes": "Section 6 establishes mutual indemnification for gross negligence and breach."
+    }
+  ]
+}
