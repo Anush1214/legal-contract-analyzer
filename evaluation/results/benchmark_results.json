@@ -1,0 +1,1137 @@
+{
+  "metadata": {
+    "name": "Legal Contract Analyzer Benchmark Suite",
+    "type": "SYNTHETIC / DEMONSTRATION BENCHMARK",
+    "description": "Curated legal domain evaluation queries mapped to exact ground-truth clause IDs across Enterprise SaaS and Consulting agreements.",
+    "version": "1.0.0",
+    "created_at": "2026-09-21",
+    "ground_truth_verified": true
+  },
+  "timestamp": "2026-09-21 22:50:42",
+  "summary": {
+    "V1_Dense": {
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 1331.75,
+      "avg_tool_calls": 0.0
+    },
+    "V2A_BM25": {
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "mrr": 0.875,
+      "ndcg_at_4": 0.9077,
+      "avg_latency_ms": 0.25,
+      "avg_tool_calls": 0.0
+    },
+    "V2B_Hybrid_NoRerank": {
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 1202.95,
+      "avg_tool_calls": 0.0
+    },
+    "V2C_Hybrid_Reranked": {
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 2834.31,
+      "avg_tool_calls": 0.0
+    },
+    "V3_Controlled_Agent": {
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 27177.04,
+      "avg_tool_calls": 2.83
+    }
+  },
+  "full_results": {
+    "V1_Dense": {
+      "system_name": "V1_Dense",
+      "queries_evaluated": 12,
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "precision_at_4": 0.25,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 1331.75,
+      "avg_tool_calls": 0.0,
+      "query_details": [
+        {
+          "query_id": "q001",
+          "question": "Can the customer terminate the agreement early for convenience without penalty?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.6432
+        },
+        {
+          "query_id": "q002",
+          "question": "Are there any post-termination non-compete restrictions, and what is their duration and geographic scope?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3683
+        },
+        {
+          "query_id": "q003",
+          "question": "What is the maximum aggregate liability cap for the vendor?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_10"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.2363
+        },
+        {
+          "query_id": "q004",
+          "question": "Does the vendor have the right to use customer data to train machine learning models?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.349
+        },
+        {
+          "query_id": "q005",
+          "question": "Does the contract automatically renew, and what is the required notice window for non-renewal?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.4132
+        },
+        {
+          "query_id": "q006",
+          "question": "Who is required to indemnify whom for third-party intellectual property claims?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.29
+        },
+        {
+          "query_id": "q007",
+          "question": "Can either party terminate this consulting agreement for convenience?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.2866
+        },
+        {
+          "query_id": "q008",
+          "question": "Who owns custom software code and designs created specifically for the client?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_8"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1565
+        },
+        {
+          "query_id": "q009",
+          "question": "How is the limitation of liability calculated for consulting services?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.4713
+        },
+        {
+          "query_id": "q010",
+          "question": "What are the restrictions on hiring or soliciting the consultant's personnel?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.2372
+        },
+        {
+          "query_id": "q011",
+          "question": "What are the payment terms and invoicing schedule (e.g. Net 30)?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_6",
+            "Standard_Consulting_Services_Agreement.pdf_clause_5"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3086
+        },
+        {
+          "query_id": "q012",
+          "question": "Is indemnification mutual or one-sided in this consulting agreement?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.2208
+        }
+      ]
+    },
+    "V2A_BM25": {
+      "system_name": "V2A_BM25",
+      "queries_evaluated": 12,
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "precision_at_4": 0.25,
+      "mrr": 0.875,
+      "ndcg_at_4": 0.9077,
+      "avg_latency_ms": 0.25,
+      "avg_tool_calls": 0.0,
+      "query_details": [
+        {
+          "query_id": "q001",
+          "question": "Can the customer terminate the agreement early for convenience without penalty?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_10"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0006
+        },
+        {
+          "query_id": "q002",
+          "question": "Are there any post-termination non-compete restrictions, and what is their duration and geographic scope?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_10",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "recall@4": 1.0,
+          "mrr": 0.5,
+          "ndcg@4": 0.6309297535714575,
+          "latency_seconds": 0.0
+        },
+        {
+          "query_id": "q003",
+          "question": "What is the maximum aggregate liability cap for the vendor?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0
+        },
+        {
+          "query_id": "q004",
+          "question": "Does the vendor have the right to use customer data to train machine learning models?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0008
+        },
+        {
+          "query_id": "q005",
+          "question": "Does the contract automatically renew, and what is the required notice window for non-renewal?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0
+        },
+        {
+          "query_id": "q006",
+          "question": "Who is required to indemnify whom for third-party intellectual property claims?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0006
+        },
+        {
+          "query_id": "q007",
+          "question": "Can either party terminate this consulting agreement for convenience?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0006
+        },
+        {
+          "query_id": "q008",
+          "question": "Who owns custom software code and designs created specifically for the client?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0
+        },
+        {
+          "query_id": "q009",
+          "question": "How is the limitation of liability calculated for consulting services?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "recall@4": 1.0,
+          "mrr": 0.5,
+          "ndcg@4": 0.6309297535714575,
+          "latency_seconds": 0.0
+        },
+        {
+          "query_id": "q010",
+          "question": "What are the restrictions on hiring or soliciting the consultant's personnel?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0005
+        },
+        {
+          "query_id": "q011",
+          "question": "What are the payment terms and invoicing schedule (e.g. Net 30)?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_5",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_9"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 0.0
+        },
+        {
+          "query_id": "q012",
+          "question": "Is indemnification mutual or one-sided in this consulting agreement?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_6",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "recall@4": 1.0,
+          "mrr": 0.5,
+          "ndcg@4": 0.6309297535714575,
+          "latency_seconds": 0.0
+        }
+      ]
+    },
+    "V2B_Hybrid_NoRerank": {
+      "system_name": "V2B_Hybrid_NoRerank",
+      "queries_evaluated": 12,
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "precision_at_4": 0.25,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 1202.95,
+      "avg_tool_calls": 0.0,
+      "query_details": [
+        {
+          "query_id": "q001",
+          "question": "Can the customer terminate the agreement early for convenience without penalty?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1379
+        },
+        {
+          "query_id": "q002",
+          "question": "Are there any post-termination non-compete restrictions, and what is their duration and geographic scope?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_10",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1598
+        },
+        {
+          "query_id": "q003",
+          "question": "What is the maximum aggregate liability cap for the vendor?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.2885
+        },
+        {
+          "query_id": "q004",
+          "question": "Does the vendor have the right to use customer data to train machine learning models?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1751
+        },
+        {
+          "query_id": "q005",
+          "question": "Does the contract automatically renew, and what is the required notice window for non-renewal?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.303
+        },
+        {
+          "query_id": "q006",
+          "question": "Who is required to indemnify whom for third-party intellectual property claims?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1911
+        },
+        {
+          "query_id": "q007",
+          "question": "Can either party terminate this consulting agreement for convenience?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1118
+        },
+        {
+          "query_id": "q008",
+          "question": "Who owns custom software code and designs created specifically for the client?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.0792
+        },
+        {
+          "query_id": "q009",
+          "question": "How is the limitation of liability calculated for consulting services?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3125
+        },
+        {
+          "query_id": "q010",
+          "question": "What are the restrictions on hiring or soliciting the consultant's personnel?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1183
+        },
+        {
+          "query_id": "q011",
+          "question": "What are the payment terms and invoicing schedule (e.g. Net 30)?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_5",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.1867
+        },
+        {
+          "query_id": "q012",
+          "question": "Is indemnification mutual or one-sided in this consulting agreement?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3716
+        }
+      ]
+    },
+    "V2C_Hybrid_Reranked": {
+      "system_name": "V2C_Hybrid_Reranked",
+      "queries_evaluated": 12,
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "precision_at_4": 0.25,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 2834.31,
+      "avg_tool_calls": 0.0,
+      "query_details": [
+        {
+          "query_id": "q001",
+          "question": "Can the customer terminate the agreement early for convenience without penalty?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 17.7494
+        },
+        {
+          "query_id": "q002",
+          "question": "Are there any post-termination non-compete restrictions, and what is their duration and geographic scope?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.7669
+        },
+        {
+          "query_id": "q003",
+          "question": "What is the maximum aggregate liability cap for the vendor?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3507
+        },
+        {
+          "query_id": "q004",
+          "question": "Does the vendor have the right to use customer data to train machine learning models?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.5858
+        },
+        {
+          "query_id": "q005",
+          "question": "Does the contract automatically renew, and what is the required notice window for non-renewal?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3884
+        },
+        {
+          "query_id": "q006",
+          "question": "Who is required to indemnify whom for third-party intellectual property claims?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.6632
+        },
+        {
+          "query_id": "q007",
+          "question": "Can either party terminate this consulting agreement for convenience?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.4408
+        },
+        {
+          "query_id": "q008",
+          "question": "Who owns custom software code and designs created specifically for the client?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.4087
+        },
+        {
+          "query_id": "q009",
+          "question": "How is the limitation of liability calculated for consulting services?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.5001
+        },
+        {
+          "query_id": "q010",
+          "question": "What are the restrictions on hiring or soliciting the consultant's personnel?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3918
+        },
+        {
+          "query_id": "q011",
+          "question": "What are the payment terms and invoicing schedule (e.g. Net 30)?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.3338
+        },
+        {
+          "query_id": "q012",
+          "question": "Is indemnification mutual or one-sided in this consulting agreement?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 1.432
+        }
+      ]
+    },
+    "V3_Controlled_Agent": {
+      "system_name": "V3_Controlled_Agent",
+      "queries_evaluated": 12,
+      "recall_at_4": 1.0,
+      "recall_at_8": 1.0,
+      "precision_at_4": 0.25,
+      "mrr": 1.0,
+      "ndcg_at_4": 1.0,
+      "avg_latency_ms": 27177.04,
+      "avg_tool_calls": 2.83,
+      "query_details": [
+        {
+          "query_id": "q001",
+          "question": "Can the customer terminate the agreement early for convenience without penalty?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 128.1502
+        },
+        {
+          "query_id": "q002",
+          "question": "Are there any post-termination non-compete restrictions, and what is their duration and geographic scope?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_9",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_6"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 85.7528
+        },
+        {
+          "query_id": "q003",
+          "question": "What is the maximum aggregate liability cap for the vendor?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 88.5411
+        },
+        {
+          "query_id": "q004",
+          "question": "Does the vendor have the right to use customer data to train machine learning models?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_1",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.2903
+        },
+        {
+          "query_id": "q005",
+          "question": "Does the contract automatically renew, and what is the required notice window for non-renewal?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_3",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_2",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_4"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.544
+        },
+        {
+          "query_id": "q006",
+          "question": "Who is required to indemnify whom for third-party intellectual property claims?",
+          "ground_truth": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_7",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_5",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_8",
+            "Enterprise_SaaS_Vendor_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.5704
+        },
+        {
+          "query_id": "q007",
+          "question": "Can either party terminate this consulting agreement for convenience?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.7882
+        },
+        {
+          "query_id": "q008",
+          "question": "Who owns custom software code and designs created specifically for the client?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.4801
+        },
+        {
+          "query_id": "q009",
+          "question": "How is the limitation of liability calculated for consulting services?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_4",
+            "Standard_Consulting_Services_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 3.4105
+        },
+        {
+          "query_id": "q010",
+          "question": "What are the restrictions on hiring or soliciting the consultant's personnel?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_8",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.5195
+        },
+        {
+          "query_id": "q011",
+          "question": "What are the payment terms and invoicing schedule (e.g. Net 30)?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_2",
+            "Standard_Consulting_Services_Agreement.pdf_clause_3",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.4307
+        },
+        {
+          "query_id": "q012",
+          "question": "Is indemnification mutual or one-sided in this consulting agreement?",
+          "ground_truth": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6"
+          ],
+          "retrieved": [
+            "Standard_Consulting_Services_Agreement.pdf_clause_6",
+            "Standard_Consulting_Services_Agreement.pdf_clause_7",
+            "Standard_Consulting_Services_Agreement.pdf_clause_1",
+            "Standard_Consulting_Services_Agreement.pdf_clause_None"
+          ],
+          "recall@4": 1.0,
+          "mrr": 1.0,
+          "ndcg@4": 1.0,
+          "latency_seconds": 2.6468
+        }
+      ]
+    }
+  }
+}
