@@ -24,14 +24,14 @@ def load_benchmark_dataset() -> Dict[str, Any]:
     with open(BENCHMARK_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def run_retrieval_benchmark() -> Dict[str, Any]:
+def run_retrieval_benchmark(include_agent: bool = True) -> Dict[str, Any]:
     """
-    Execute standardized benchmark across all retrieval configurations:
+    Execute standardized benchmark across retrieval configurations:
       1. V1: Dense Retrieval Alone
       2. V2A: BM25 Lexical Alone
       3. V2B: Hybrid (Dense + BM25) without Reranking
       4. V2C: Hybrid (Dense + BM25) + Cross-Encoder Reranking
-      5. V3: Controlled Agentic RAG
+      5. V3: Controlled Agentic RAG (optional via include_agent)
     """
     data = load_benchmark_dataset()
     queries = data.get("queries", [])
@@ -55,9 +55,11 @@ def run_retrieval_benchmark() -> Dict[str, Any]:
         "V1_Dense": lambda q, c: dense.retrieve(q, contract_name=c, top_k=8),
         "V2A_BM25": lambda q, c: bm25.retrieve(q, contract_name=c, top_k=8),
         "V2B_Hybrid_NoRerank": lambda q, c: hybrid.retrieve(q, contract_name=c, top_k=8, use_reranker=False),
-        "V2C_Hybrid_Reranked": lambda q, c: hybrid.retrieve(q, contract_name=c, top_k=8, use_reranker=True),
-        "V3_Controlled_Agent": None  # Handled separately
+        "V2C_Hybrid_Reranked": lambda q, c: hybrid.retrieve(q, contract_name=c, top_k=8, use_reranker=True)
     }
+
+    if include_agent:
+        systems["V3_Controlled_Agent"] = None  # Handled separately
 
     results: Dict[str, Dict[str, Any]] = {}
 
@@ -125,14 +127,25 @@ def run_retrieval_benchmark() -> Dict[str, Any]:
             "query_details": query_details
         }
 
-    # Save to JSON
+    # If V3 was excluded from this run, retain previous V3 results if available
     json_path = RESULTS_DIR / "benchmark_results.json"
+    if not include_agent and json_path.exists():
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                prev_data = json.load(f)
+            prev_v3 = prev_data.get("full_results", {}).get("V3_Controlled_Agent")
+            if prev_v3:
+                results["V3_Controlled_Agent"] = prev_v3
+        except Exception as e:
+            logger.warning(f"Could not load previous V3 benchmark data: {e}")
+
+    # Save to JSON
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(
             {
                 "metadata": data.get("benchmark_metadata", {}),
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "summary": {k: {m: v[m] for m in ["recall_at_4", "recall_at_8", "mrr", "ndcg_at_4", "avg_latency_ms", "avg_tool_calls"]} for k, v in results.items()},
+                "summary": {k: {m: v[m] for m in ["recall_at_4", "recall_at_8", "precision_at_4", "mrr", "ndcg_at_4", "avg_latency_ms", "avg_tool_calls"]} for k, v in results.items()},
                 "full_results": results
             },
             f,

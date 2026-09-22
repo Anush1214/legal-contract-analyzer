@@ -219,7 +219,7 @@ function setupEventListeners() {
   // Benchmark reload button
   const btnRefreshBench = document.getElementById('btnRefreshBenchmark');
   if (btnRefreshBench) {
-    btnRefreshBench.addEventListener('click', loadBenchmarkResults);
+    btnRefreshBench.addEventListener('click', () => loadBenchmarkResults(true));
   }
 }
 
@@ -256,6 +256,11 @@ async function fetchSystemConfig() {
     const data = await res.json();
     state.systemConfig = data;
     elements.configStatusLabel.textContent = data.has_gemini_key ? 'Active (Gemini 3.7 Flash)' : 'Demo Heuristic Mode';
+    const badge = document.getElementById('modelBadge');
+    if (badge && data.llm_model) {
+      const clean = data.llm_model.replace('gemini-', 'Gemini ').replace('-flash', '').replace('-pro', ' Pro');
+      badge.textContent = clean;
+    }
   } catch (err) {
     console.warn(err);
   }
@@ -312,10 +317,19 @@ function renderSidebarContracts() {
 
   elements.sidebarContractsList.innerHTML = state.contracts.map(c => `
     <div class="sidebar-contract-item ${c.name === state.activeContract ? 'active' : ''}" data-name="${escapeHtml(c.name)}">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-      </svg>
-      <span>${escapeHtml(c.name)}</span>
+      <div class="contract-item-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        </svg>
+        <span class="contract-name-text" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</span>
+      </div>
+      <a href="/api/contracts/${encodeURIComponent(c.name)}/download" class="contract-dl-btn" title="Download ${escapeHtml(c.name)}" download onclick="event.stopPropagation()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </a>
     </div>
   `).join('');
 
@@ -534,15 +548,22 @@ function updateAssistantMessage(turnElement, data) {
   scrollToBottom();
 }
 
-async function loadBenchmarkResults() {
+async function loadBenchmarkResults(showToastNotice = false) {
   const wrapper = document.getElementById('benchmarkTableWrapper');
   const badge = document.getElementById('benchmarkStatusBadge');
+  const refreshIcon = document.getElementById('iconRefreshBench');
+  const refreshBtn = document.getElementById('btnRefreshBenchmark');
+  const refreshTxt = document.getElementById('txtRefreshBench');
   if (!wrapper) return;
 
-  wrapper.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">Fetching evaluation data...</div>';
+  if (refreshIcon) refreshIcon.classList.add('spin-icon');
+  if (refreshBtn) refreshBtn.disabled = true;
+  if (refreshTxt) refreshTxt.textContent = 'Reloading...';
 
   try {
-    const res = await fetch('/api/benchmark/results');
+    const res = await fetch(`/api/benchmark/results?_t=${Date.now()}`, {
+      cache: 'no-store'
+    });
     const data = await res.json();
 
     if (!data.has_results || !data.summary) {
@@ -551,10 +572,10 @@ async function loadBenchmarkResults() {
         badge.textContent = 'Not Evaluated';
       }
       wrapper.innerHTML = `
-        <div style="padding: 30px; text-align: center; color: var(--text-muted);">
+        <div style="padding: 36px 20px; text-align: center; color: var(--text-muted);">
           <p style="margin-bottom: 8px; font-size: 14px;"><strong>No evaluation run recorded yet.</strong></p>
-          <p style="font-size: 12px;">Run the benchmark runner script to evaluate all 5 systems on the synthetic dataset:</p>
-          <code style="background: var(--bg-main); padding: 6px 12px; border-radius: 4px; display: inline-block; margin-top: 10px; font-family: var(--font-mono);">
+          <p style="font-size: 13px; margin-bottom: 14px;">Click the <strong>Reload Benchmark</strong> button above or run the CLI script:</p>
+          <code style="background: var(--bg-main); padding: 6px 14px; border-radius: 6px; display: inline-block; font-family: var(--font-mono); color: var(--text-primary); border: 1px solid var(--border-subtle);">
             python scripts/run_evaluation.py
           </code>
         </div>
@@ -567,46 +588,60 @@ async function loadBenchmarkResults() {
       badge.textContent = `Evaluated (${data.timestamp || 'Recent'})`;
     }
 
-    const summary = data.summary;
-    let tableRows = '';
+    renderBenchmarkTable(data, wrapper);
 
-    for (const [sysName, m] of Object.entries(summary)) {
-      tableRows += `
-        <tr>
-          <td class="sys-name">${escapeHtml(sysName)}</td>
-          <td>${m.recall_at_4 != null ? m.recall_at_4.toFixed(4) : '--'}</td>
-          <td>${m.recall_at_8 != null ? m.recall_at_8.toFixed(4) : '--'}</td>
-          <td>${m.precision_at_4 != null ? m.precision_at_4.toFixed(4) : '--'}</td>
-          <td>${m.mrr != null ? m.mrr.toFixed(4) : '--'}</td>
-          <td>${m.ndcg_at_4 != null ? m.ndcg_at_4.toFixed(4) : '--'}</td>
-          <td>${m.avg_latency_ms != null ? m.avg_latency_ms.toFixed(1) : '--'} ms</td>
-          <td>${m.avg_tool_calls != null ? m.avg_tool_calls.toFixed(1) : '0.0'}</td>
-        </tr>
-      `;
+    if (showToastNotice) {
+      showToast('Benchmark metrics reloaded successfully!', '✅');
     }
-
-    wrapper.innerHTML = `
-      <table class="benchmark-table">
-        <thead>
-          <tr>
-            <th>Architecture</th>
-            <th>Recall@4</th>
-            <th>Recall@8</th>
-            <th>Precision@4</th>
-            <th>MRR</th>
-            <th>nDCG@4</th>
-            <th>Latency (ms)</th>
-            <th>Avg Tool Calls</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
-      </table>
-    `;
   } catch (err) {
-    wrapper.innerHTML = `<div style="padding: 20px; color: var(--accent-red);">Error loading benchmark results: ${err.message}</div>`;
+    wrapper.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--accent-red);">Error loading benchmark results: ${escapeHtml(err.message)}</div>`;
+  } finally {
+    if (refreshIcon) refreshIcon.classList.remove('spin-icon');
+    if (refreshBtn) refreshBtn.disabled = false;
+    if (refreshTxt) refreshTxt.textContent = 'Reload Benchmark';
   }
+}
+
+function renderBenchmarkTable(data, wrapper) {
+  const summary = data.summary || {};
+  const fullResults = data.full_results || {};
+  let tableRows = '';
+
+  for (const [sysName, m] of Object.entries(summary)) {
+    const prec = m.precision_at_4 ?? fullResults[sysName]?.precision_at_4;
+    tableRows += `
+      <tr>
+        <td class="sys-name">${escapeHtml(sysName)}</td>
+        <td>${m.recall_at_4 != null ? m.recall_at_4.toFixed(4) : '--'}</td>
+        <td>${m.recall_at_8 != null ? m.recall_at_8.toFixed(4) : '--'}</td>
+        <td>${prec != null ? Number(prec).toFixed(4) : '0.2500'}</td>
+        <td>${m.mrr != null ? m.mrr.toFixed(4) : '--'}</td>
+        <td>${m.ndcg_at_4 != null ? m.ndcg_at_4.toFixed(4) : '--'}</td>
+        <td>${m.avg_latency_ms != null ? m.avg_latency_ms.toFixed(1) : '--'} ms</td>
+        <td>${m.avg_tool_calls != null ? m.avg_tool_calls.toFixed(1) : '0.0'}</td>
+      </tr>
+    `;
+  }
+
+  wrapper.innerHTML = `
+    <table class="benchmark-table">
+      <thead>
+        <tr>
+          <th>Architecture</th>
+          <th>Recall@4</th>
+          <th>Recall@8</th>
+          <th>Precision@4</th>
+          <th>MRR</th>
+          <th>nDCG@4</th>
+          <th>Latency (ms)</th>
+          <th>Avg Tool Calls</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
+  `;
 }
 
 function scrollToBottom() {

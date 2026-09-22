@@ -233,6 +233,7 @@ body {
 .sidebar-contract-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 8px 10px;
   border-radius: var(--radius-md);
@@ -240,9 +241,44 @@ body {
   font-size: 13px;
   cursor: pointer;
   transition: var(--transition);
-  white-space: nowrap;
+}
+
+.contract-item-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.contract-name-text {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contract-dl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.sidebar-contract-item:hover .contract-dl-btn {
+  opacity: 0.85;
+}
+
+.contract-dl-btn:hover {
+  opacity: 1 !important;
+  color: #60a5fa !important;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .sidebar-contract-item:hover {
@@ -1343,6 +1379,51 @@ body {
 /* ==========================================================================
    Research Benchmark Dashboard View
    ========================================================================== */
+.btn-primary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  color: #000000;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+}
+
+.btn-primary-pill:hover:not(:disabled) {
+  background: #E5E5E5;
+  transform: translateY(-1px);
+}
+
+.btn-primary-pill:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary-pill svg {
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
 .benchmark-container-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);

@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body class="dark-theme">
   <div class="chatgpt-layout">
@@ -123,7 +124,7 @@
           </button>
           
           <div class="model-dropdown-trigger" id="modelDropdownTrigger">
-            <span class="model-name">Legal Analyzer <span class="model-version">Gemini 3.6</span></span>
+            <span class="model-name">Legal Analyzer <span class="model-version" id="modelBadge">Gemini 3.7</span></span>
           </div>
 
           <!-- RAG Pipeline Architecture Selector -->
@@ -359,13 +360,13 @@
               <h2>Information Retrieval Research Benchmark</h2>
               <p>Standardized evaluation protocol comparing V1, V2A, V2B, V2C, and V3 across IR & system metrics on identical ground-truth queries.</p>
             </div>
-            <button id="btnRefreshBenchmark" class="btn-primary-pill">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button id="btnRefreshBenchmark" class="btn-primary-pill" title="Reload benchmark evaluation metrics">
+              <svg id="iconRefreshBench" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="23 4 23 10 17 10"></polyline>
                 <polyline points="1 20 1 14 7 14"></polyline>
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
               </svg>
-              <span>Reload Benchmark</span>
+              <span id="txtRefreshBench">Reload Benchmark</span>
             </button>
           </div>
 
@@ -483,6 +484,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
