@@ -1,0 +1,6 @@
+System,Recall@4,Recall@8,Precision@4,MRR,nDCG@4,Avg_Latency_ms,Avg_Tool_Calls
+V1_Dense,1.0,1.0,0.25,1.0,1.0,3438.76,0.0
+V2A_BM25,1.0,1.0,0.25,0.875,0.9077,0.25,0.0
+V2B_Hybrid_NoRerank,1.0,1.0,0.25,1.0,1.0,1856.53,0.0
+V2C_Hybrid_Reranked,1.0,1.0,0.25,1.0,1.0,2159.99,0.0
+V3_Controlled_Agent,1.0,1.0,0.25,1.0,1.0,27177.04,2.83

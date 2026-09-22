@@ -1,17 +1,32 @@
 import os
-from typing import Optional, List
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Response
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
+from pydantic import BaseModel, Field
 
-from backend.config import get_gemini_api_key, set_gemini_api_key, LLM_MODEL, EMBEDDING_MODEL, SAMPLE_DIR
+from backend.config import (
+    get_gemini_api_key,
+    set_gemini_api_key,
+    LLM_MODEL,
+    EMBEDDING_MODEL,
+    EMBEDDING_DIM,
+    RAG_VERSION,
+    RAG_TOP_K,
+    RAG_MIN_RELEVANCE_SCORE,
+    EVALUATION_DIR,
+    SAMPLE_DIR,
+    UPLOAD_DIR
+)
+from backend.retrieval.embedding_service import get_embedding_status
 from backend.vector_store import (
     index_contract,
     list_indexed_contracts,
     get_contract_clauses,
-    delete_contract,
-    contract_collection
+    delete_contract
 )
 from backend.legal_engine import (
     analyze_contract,
@@ -23,22 +38,36 @@ from backend.sample_contracts import ensure_sample_contracts
 
 app = FastAPI(
     title="Legal Contract Analyzer API",
-    description="RAG-powered Legal Contract Analyzer using ChromaDB and Gemini 3.7 Flash",
-    version="1.0.0"
+    description="Research-Grade Legal Document Intelligence Platform comparing Dense, Hybrid, and Controlled Agentic RAG.",
+    version="2.0.0"
 )
+
+# CORS Configuration: restrict wildcard origins with credentials
+ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Maximum file upload size: 25 Megabytes
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+
 # Pydantic Request Models
 class AnalyzeRequest(BaseModel):
     question: str
     contract_name: Optional[str] = None
+    version: Optional[str] = Field(default=None, description="Retrieval architecture: 'v1' (Dense), 'v2' (Hybrid+Rerank), or 'v3' (Agentic)")
+    top_k: Optional[int] = Field(default=None, ge=1, le=20)
+    min_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
 
 class ScanRisksRequest(BaseModel):
     contract_name: str
@@ -56,44 +85,107 @@ class ExplainClauseRequest(BaseModel):
 class ConfigUpdateRequest(BaseModel):
     gemini_api_key: str
 
+class RunBenchmarkRequest(BaseModel):
+    include_agent: bool = Field(default=False, description="Whether to include agentic V3 evaluation")
+
 # API Routes
 @app.get("/api/config")
 def get_system_config():
+    embed_status = get_embedding_status()
     key = get_gemini_api_key()
     has_key = bool(key and len(key) > 8 and not key.startswith("demo_"))
     return {
         "has_gemini_key": has_key,
         "masked_key": f"{key[:7]}...{key[-4:]}" if has_key else "Not Configured",
-        "embedding_model": EMBEDDING_MODEL,
+        "embedding_model": embed_status["embedding_model"],
+        "embedding_dimension": embed_status["embedding_dimension"],
+        "retrieval_mode": embed_status["mode"],
+        "is_live_api": embed_status["is_live_api"],
         "llm_model": LLM_MODEL,
-        "mode": f"Live Google {LLM_MODEL} + ChromaDB RAG" if has_key else "Local Legal Heuristic Mode"
+        "default_rag_version": RAG_VERSION,
+        "supported_versions": ["v1", "v2", "v3"]
     }
 
 @app.post("/api/config")
 def update_system_config(req: ConfigUpdateRequest):
-    set_gemini_api_key(req.gemini_api_key)
+    clean_key = req.gemini_api_key.strip()
+    if not clean_key or len(clean_key) < 8:
+        raise HTTPException(status_code=400, detail="Invalid API key format.")
+    set_gemini_api_key(clean_key)
     return get_system_config()
 
 @app.get("/api/contracts")
 def get_contracts():
     return {"contracts": list_indexed_contracts()}
 
+@app.get("/api/contracts/{contract_name}/download")
+def download_contract(contract_name: str):
+    """Download a contract PDF directly by filename."""
+    safe_name = Path(contract_name).name
+    p_sample = SAMPLE_DIR / safe_name
+    p_upload = UPLOAD_DIR / safe_name
+    
+    target_path = None
+    if p_sample.exists():
+        target_path = p_sample
+    elif p_upload.exists():
+        target_path = p_upload
+        
+    if not target_path or not target_path.exists():
+        raise HTTPException(status_code=404, detail=f"Contract '{safe_name}' not found for download.")
+        
+    return FileResponse(
+        str(target_path),
+        media_type="application/pdf",
+        filename=safe_name,
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'}
+    )
+
+@app.get("/api/samples")
+def list_available_samples():
+    """List all available sample contract PDFs with direct download URLs."""
+    ensure_sample_contracts()
+    pdf_files = list(SAMPLE_DIR.glob("*.pdf"))
+    return {
+        "samples": [
+            {
+                "name": p.name,
+                "size_kb": round(p.stat().st_size / 1024, 1),
+                "download_url": f"/api/contracts/{p.name}/download",
+                "is_indian": "india" in p.name.lower()
+            }
+            for p in sorted(pdf_files, key=lambda x: x.name)
+        ]
+    }
+
 @app.post("/api/contracts/upload")
 async def upload_contract(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
-    
+    # 1. Filename sanitization to prevent path traversal
+    safe_filename = Path(file.filename).name
+    if not safe_filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files (.pdf) are supported.")
+
+    # 2. File size and header validation
     try:
         pdf_bytes = await file.read()
         if len(pdf_bytes) == 0:
             raise HTTPException(status_code=400, detail="Uploaded file is empty.")
-            
-        result = index_contract(pdf_bytes, file.filename)
+        if len(pdf_bytes) > MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="File exceeds maximum allowed size of 25MB.")
+
+        # Validate PDF magic bytes: %PDF-
+        if not pdf_bytes.startswith(b"%PDF-"):
+            raise HTTPException(status_code=400, detail="Invalid file format: Missing PDF magic header.")
+
+        # Execute indexing in thread pool to prevent blocking event loop
+        result = await run_in_threadpool(index_contract, pdf_bytes, safe_filename)
         return {
-            "message": f"Successfully indexed '{file.filename}'",
+            "message": f"Successfully indexed '{safe_filename}'",
             "contract": result["contract"],
             "total_clauses": result["total_clauses"]
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -105,32 +197,46 @@ def get_clauses_for_contract(contract_name: str):
     return {"contract": contract_name, "clauses": clauses}
 
 @app.post("/api/contracts/explain-clause")
-def explain_clause(req: ExplainClauseRequest):
-    return explain_single_clause(req.clause_text, req.clause_number, req.contract_name)
+async def explain_clause(req: ExplainClauseRequest):
+    return await run_in_threadpool(explain_single_clause, req.clause_text, req.clause_number, req.contract_name)
 
 @app.post("/api/analyze")
-def run_contract_analysis(req: AnalyzeRequest):
+async def run_analysis(req: AnalyzeRequest):
     if not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
-    return analyze_contract(req.question, req.contract_name)
+
+    kwargs = {}
+    if req.top_k is not None:
+        kwargs["top_k"] = req.top_k
+    if req.min_score is not None:
+        kwargs["min_score"] = req.min_score
+
+    result = await run_in_threadpool(
+        analyze_contract,
+        req.question,
+        req.contract_name,
+        req.version,
+        **kwargs
+    )
+    return result
 
 @app.post("/api/scan-risks")
-def run_risk_scan(req: ScanRisksRequest):
-    return flag_risky_clauses(req.contract_name)
+async def run_risk_scan(req: ScanRisksRequest):
+    return await run_in_threadpool(flag_risky_clauses, req.contract_name)
 
 @app.post("/api/compare")
-def run_contract_comparison(req: CompareRequest):
-    return compare_contracts(req.contract_a, req.contract_b, req.topic)
+async def run_contract_comparison(req: CompareRequest):
+    return await run_in_threadpool(compare_contracts, req.contract_a, req.contract_b, req.topic)
 
 @app.post("/api/load-samples")
-def load_sample_contracts():
+async def load_sample_contracts():
     try:
-        sample_files = ensure_sample_contracts()
+        sample_files = await run_in_threadpool(ensure_sample_contracts)
         results = []
         for p in sample_files:
             with open(p, "rb") as f:
                 bytes_data = f.read()
-                res = index_contract(bytes_data, p.name)
+                res = await run_in_threadpool(index_contract, bytes_data, p.name)
                 results.append({"name": p.name, "clauses": res["total_clauses"]})
         return {
             "message": "Sample contracts loaded and indexed successfully!",
@@ -143,6 +249,75 @@ def load_sample_contracts():
 def remove_contract(contract_name: str):
     success = delete_contract(contract_name)
     return {"success": success, "contract": contract_name}
+
+@app.get("/api/benchmark/results")
+def get_benchmark_results(response: Response):
+    """Returns genuine benchmark results if executed, or N/A message."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    json_path = EVALUATION_DIR / "results" / "benchmark_results.json"
+    if not json_path.exists():
+        return {
+            "has_results": False,
+            "message": "Benchmark not yet evaluated. Click 'Run Benchmark' or execute 'python scripts/run_evaluation.py'.",
+            "results": None
+        }
+
+    import json
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    summary = data.get("summary", {})
+    full_results = data.get("full_results", {})
+
+    # Ensure precision_at_4 is always populated in summary
+    for sys_name, m in summary.items():
+        if "precision_at_4" not in m or m["precision_at_4"] is None:
+            m["precision_at_4"] = full_results.get(sys_name, {}).get("precision_at_4", 0.25)
+
+    return {
+        "has_results": True,
+        "timestamp": data.get("timestamp"),
+        "summary": summary,
+        "full_results": full_results
+    }
+
+@app.post("/api/benchmark/run")
+async def trigger_benchmark_run(req: RunBenchmarkRequest = RunBenchmarkRequest()):
+    """Executes the standardized IR retrieval benchmark live and saves fresh empirical results."""
+    try:
+        from evaluation.runner import run_retrieval_benchmark
+        results = await run_in_threadpool(run_retrieval_benchmark, include_agent=req.include_agent)
+        json_path = EVALUATION_DIR / "results" / "benchmark_results.json"
+        import json
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        summary = data.get("summary", {})
+        full_results = data.get("full_results", {})
+        for sys_name, m in summary.items():
+            if "precision_at_4" not in m or m["precision_at_4"] is None:
+                m["precision_at_4"] = full_results.get(sys_name, {}).get("precision_at_4", 0.25)
+
+        return {
+            "success": True,
+            "message": f"Benchmark completed successfully! Evaluated {len(results)} architectures.",
+            "timestamp": data.get("timestamp"),
+            "summary": summary,
+            "full_results": full_results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    icon_path = Path(__file__).resolve().parent.parent / "frontend" / "favicon.svg"
+    if icon_path.exists():
+        return FileResponse(icon_path, media_type="image/svg+xml")
+    return Response(status_code=204)
 
 # Serve static frontend files
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")

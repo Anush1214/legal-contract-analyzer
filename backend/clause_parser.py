@@ -8,7 +8,7 @@ def detect_clause_category(text: str) -> str:
     t = text.lower()
     if any(k in t for k in ["terminate", "termination", "term of agreement", "expiration"]):
         return "Termination & Term"
-    if any(k in t for k in ["non-compete", "non compete", "non-solicitation", "restrictive covenant"]):
+    if any(k in t for k in ["non-compete", "non compete", "not compete", "non-solicitation", "solicit", "restrictive covenant"]):
         return "Non-Compete & Restrictive"
     if any(k in t for k in ["liability", "limitation of liability", "damages", "consequential"]):
         return "Limitation of Liability"

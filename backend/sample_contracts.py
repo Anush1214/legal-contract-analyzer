@@ -68,6 +68,125 @@ CONTRACT_2_CLAUSES = [
      "This Agreement shall be interpreted in accordance with the laws of the State of New York. In the event of any disagreement, the parties agree to first attempt informal executive negotiation for thirty (30) days prior to initiating legal proceedings in state or federal courts located in New York County.")
 ]
 
+CONTRACT_INDIA_IT_CLAUSES = [
+    ("Section 1. Engagement and Scope of Software Services",
+     "Vendor (TechFlow Software India Private Limited, Bengaluru) shall deliver cloud software engineering, API integrations, and maintenance services as specified in the Statement of Work. All deliverables shall comply with Indian standard industry specifications."),
+
+    ("Section 2. Invoicing, Goods & Services Tax (GST), and TDS Deductions",
+     "Fees shall be invoiced in Indian Rupees (INR). Customer shall pay all undisputed invoices within thirty (30) days of receipt. Invoices shall reflect applicable Goods and Services Tax (GST) under the Central Goods and Services Tax Act, 2017 (CGST/SGST/IGST). Customer shall deduct Tax Deducted at Source (TDS) under Section 194J of the Income Tax Act, 1961, and provide valid Form 16A TDS certificates within the statutory deadline."),
+
+    ("Section 3. Term and Renewal",
+     "This Agreement shall be effective for an initial term of twenty-four (24) months from the Effective Date. The Agreement shall renew automatically for successive twelve (12) month periods unless either party provides sixty (60) days prior written non-renewal notice."),
+
+    ("Section 4. Intellectual Property Rights and Indian Copyright Act Waiver",
+     "Upon receipt of full payment, Vendor assigns to Customer all ownership rights in custom bespoke code developed under this Agreement. Pursuant to Section 19(4) of the Indian Copyright Act, 1957, Vendor expressly agrees that the assignment of copyright shall not lapse, notwithstanding that Customer does not exercise the rights within a period of one year from the date of assignment."),
+
+    ("Section 5. Data Protection and Digital Personal Data Protection Act Compliance",
+     "Each party covenants strict compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act) and the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011 promulgated under Section 43A of the Information Technology Act, 2000. Customer personal data shall not be transferred outside India without prior statutory notification."),
+
+    ("Section 6. Restrictive Covenants and Post-Termination Non-Compete",
+     "During the term of this Agreement and for a period of twenty-four (24) months following termination, Customer and its affiliates shall not directly or indirectly engage in, finance, or operate any software enterprise competing with Vendor within the territory of India, nor recruit any personnel of Vendor. (Note: Under Section 27 of the Indian Contract Act, 1872, agreements in restraint of trade are void to that extent)."),
+
+    ("Section 7. Indemnification and Defense",
+     "Customer agrees to indemnify, defend, and hold harmless Vendor and its directors from any third-party claims, tax penalties, or regulatory liabilities arising out of Customer's breach of applicable Indian cyber laws or unauthorized data processing."),
+
+    ("Section 8. Limitation of Liability",
+     "To the fullest extent permitted under the Indian Contract Act, 1872, Vendor's total cumulative aggregate liability for all claims under this Agreement shall not exceed fifty thousand Indian Rupees (INR 50,000) or the fees paid by Customer in the preceding one (1) month, excluding cases of gross negligence or willful misconduct."),
+
+    ("Section 9. Stamp Duty and Enforceability",
+     "This Agreement shall be duly executed on non-judicial stamp paper of appropriate denomination in accordance with the Karnataka Stamp Act, 1957. The expenses of stamp duty shall be borne equally by both parties."),
+
+    ("Section 10. Governing Law, Seat of Arbitration, and Jurisdiction",
+     "This Agreement shall be governed by and construed in accordance with the substantive laws of the Republic of India. Any dispute or claim arising out of or in connection with this Agreement shall be referred to and finally resolved by arbitration administered under the Arbitration and Conciliation Act, 1996. The arbitral tribunal shall consist of a sole arbitrator appointed by mutual consent. The seat and venue of arbitration shall be Bengaluru, Karnataka, India. Subject to arbitration, the courts at Bengaluru shall have exclusive jurisdiction.")
+]
+
+CONTRACT_INDIA_EMPLOYMENT_CLAUSES = [
+    ("Section 1. Appointment, Role, and Compensation",
+     "The Company hereby appoints the Executive as Principal Legal Counsel. Executive shall receive a total annual Cost to Company (CTC) payable monthly, subject to statutory deductions including Employees' Provident Fund (EPF Act, 1952), Professional Tax, and Income Tax TDS."),
+
+    ("Section 2. Probation Period and Separation Notice",
+     "The Executive shall serve a probationary period of six (6) months. During probation, either party may terminate the employment with fifteen (15) days written notice. Following confirmation, either party may terminate by providing ninety (90) days advance notice or gross basic salary in lieu thereof."),
+
+    ("Section 3. Liquidated Damages for Early Departure",
+     "If the Executive resigns or terminates employment prior to completing twelve (12) months of active service, the Executive agrees to pay the Company an early separation indemnity of INR 5,00,000 as liquidated damages under Section 74 of the Indian Contract Act, 1872 to reimburse specialized onboarding and training expenditures."),
+
+    ("Section 4. Proprietary Information and Inventions Assignment",
+     "All patents, trademarks, works of authorship, and technological innovations created by Executive during employment shall constitute works made for hire under the Indian Copyright Act, 1957 and Patents Act, 1970, belonging exclusively to the Company from inception."),
+
+    ("Section 5. Confidentiality Obligations",
+     "Executive shall hold all confidential information, business secrets, and client data in strictest confidence during and perpetually after employment, in accordance with Indian common law duties of breach of confidence."),
+
+    ("Section 6. Post-Employment Non-Compete Restriction",
+     "Executive undertakes that for a period of twelve (12) months following separation, Executive shall not join, advise, or consult for any direct competitor operating in India. (Note: Indian jurisprudence under Niranjan Shankar Golikari and Percept D'Mark establishes that post-employment non-compete covenants are generally void and unenforceable under Section 27 of the Indian Contract Act, 1872)."),
+
+    ("Section 7. Non-Solicitation of Employees and Clients",
+     "For a period of twenty-four (24) months following termination, Executive shall not solicit, entice, or induce any employee, contractor, or vendor of the Company to terminate their engagement with the Company."),
+
+    ("Section 8. Prevention of Sexual Harassment (POSH) and Code of Conduct",
+     "Executive covenants strict compliance with the Company Code of Conduct and the Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013 (POSH Act). Any violation constitutes grounds for immediate termination for cause without notice or severance."),
+
+    ("Section 9. Governing Law and Exclusive Jurisdiction",
+     "This Agreement is governed by the laws of India. Any legal action, dispute, or proceeding relating to this Agreement shall be subject to the exclusive jurisdiction of the civil courts and labor tribunals in New Delhi, India.")
+]
+
+CONTRACT_INDIA_NDA_CLAUSES = [
+    ("Section 1. Parties and Purpose of Evaluation",
+     "This Mutual Non-Disclosure Agreement is executed between Mumbai Alpha Innovations Private Limited (Mumbai, Maharashtra) and Bangalore Tech Ventures Private Limited (Bengaluru, Karnataka) to facilitate confidential evaluations of strategic joint commercial software ventures."),
+
+    ("Section 2. Definition of Confidential Information",
+     "Confidential Information encompasses all proprietary software architectures, algorithmic models, API specifications, financial forecasts, customer lists, and trade secrets disclosed by either party, whether in oral, visual, or electronic form."),
+
+    ("Section 3. Non-Disclosure Obligations and Standard of Care",
+     "The Receiving Party shall safeguard the Disclosing Party's Confidential Information with the same degree of care it employs for its own proprietary trade secrets, but not less than reasonable care. Information shall only be shared with personnel who have a strict need-to-know."),
+
+    ("Section 4. Exclusions and Regulatory Compulsion",
+     "Confidential Information does not include information that becomes publicly known through no fault of Receiving Party. Disclosure is permitted where required by court summons under the Code of Civil Procedure, 1908, or regulatory directives issued by SEBI, RBI, or the Ministry of Corporate Affairs (MCA)."),
+
+    ("Section 5. Digital Personal Data Protection Act Compliance",
+     "Where Confidential Information includes personal identifiers of Indian citizens, both parties shall adhere strictly to the Digital Personal Data Protection Act, 2023 (DPDP Act) and implement standard data security safeguards under Section 43A of the Information Technology Act, 2000."),
+
+    ("Section 6. Return or Verified Destruction of Proprietary Data",
+     "Within fourteen (14) days of receiving a written request, the Receiving Party shall return or certify the permanent destruction of all documents, memory drives, and derived analytical summaries containing Confidential Information."),
+
+    ("Section 7. Injunctive Relief and Specific Performance",
+     "Both parties acknowledge that monetary damages alone would be inadequate compensation for a breach of trade secrets. The Disclosing Party shall be entitled to seek immediate preliminary and permanent injunctive relief and specific performance under the Specific Relief Act, 1963 without requirement of posting bond."),
+
+    ("Section 8. Term of Protection",
+     "The confidentiality obligations under this Agreement shall persist for a period of three (3) years from the date of disclosure; provided that trade secrets and proprietary source code shall remain confidential perpetually until public disclosure without fault."),
+
+    ("Section 9. Governing Law, Stamp Duty, and Jurisdiction",
+     "This Agreement is executed under the laws of the Republic of India and subject to appropriate stamp duty under the Maharashtra Stamp Act, 1958. Any dispute arising out of or related to this Agreement shall be subject to the exclusive jurisdiction of the competent courts in Mumbai, Maharashtra, India.")
+]
+
+CONTRACT_INDIA_LEASE_CLAUSES = [
+    ("Section 1. Demised Premises and Term of Lease",
+     "Lessor (Embassy TechParks Developers Private Limited, Bengaluru) grants to Lessee (CloudMatrix Technologies Private Limited) a commercial lease of Suite 401, measuring 8,500 square feet at Outer Ring Road IT Corridor, Bengaluru, for an initial term of five (5) years."),
+
+    ("Section 2. Monthly Rent, GST, and Maintenance Escalation",
+     "Lessee shall pay monthly lease rent of INR 8,50,000 plus applicable Goods & Services Tax (18% GST) in advance by the 5th day of each calendar month. The lease rent shall be subject to a predetermined escalation of 5% per annum at the end of each consecutive twelve (12) month period."),
+
+    ("Section 3. Interest-Free Refundable Security Deposit",
+     "Lessee has deposited with Lessor an interest-free refundable security deposit equal to six (6) months' rent (INR 51,00,000). The deposit shall be refunded within thirty (30) days of vacant handover of the premises, subject to deductions for unpaid utilities or structural restoration."),
+
+    ("Section 4. Mandatory Lock-in Period and Liquidated Damages",
+     "Both parties agree to a mandatory lock-in period of thirty-six (36) months from the Commencement Date. In the event Lessee vacates, surrenders, or breaches the lease prior to the expiration of the lock-in period, Lessee shall be liable to pay liquidated damages equal to the entire balance of rent payable for the remainder of the lock-in period under Section 74 of the Indian Contract Act, 1872."),
+
+    ("Section 5. Statutory Duties and Transfer of Property Act Covenants",
+     "The rights and obligations of the Lessor and Lessee shall be governed by Section 108 of the Transfer of Property Act, 1882. Lessee shall keep the interior in good tenantable repair, while Lessor remains responsible for major structural integrity and external facade."),
+
+    ("Section 6. Permitted Commercial Use and Subletting Restrictions",
+     "The demised premises shall be utilized exclusively for IT/ITES software development. Lessee shall not assign, sublet, underlet, or part with possession of the premises or any part thereof without obtaining the prior written consent of the Lessor."),
+
+    ("Section 7. Default, Notice, and Right of Re-entry",
+     "In the event of default in rent payment exceeding thirty (30) days, Lessor shall serve a fifteen (15) day cure notice under Section 111(g) of the Transfer of Property Act, 1882. If uncured, Lessor shall have the right of re-entry and immediate termination of lease."),
+
+    ("Section 8. Stamp Duty, Registration, and Legal Costs",
+     "This lease agreement shall be compulsorily registered under Section 17 of the Registration Act, 1908, with stamp duty paid in compliance with the Karnataka Stamp Act, 1957. The cost of stamp duty and registration fees shall be shared equally between Lessor and Lessee."),
+
+    ("Section 9. Governing Law, Arbitration, and Jurisdiction",
+     "This Lease shall be interpreted under the laws of India. Any dispute arising out of this lease shall be resolved by arbitration under the Arbitration and Conciliation Act, 1996 by a sole arbitrator sitting at Bengaluru. The civil courts and commercial courts at Bengaluru shall have exclusive jurisdiction.")
+]
+
 def generate_pdf(filename: str, title: str, clauses: list) -> Path:
     """Generate a clean, professional PDF file containing legal clauses."""
     filepath = SAMPLE_DIR / filename
@@ -122,13 +241,25 @@ def generate_pdf(filename: str, title: str, clauses: list) -> Path:
     return filepath
 
 def ensure_sample_contracts():
-    """Ensure sample contract PDFs exist on disk."""
+    """Ensure sample contract PDFs exist on disk, including Indian law contracts."""
     p1 = SAMPLE_DIR / "Enterprise_SaaS_Vendor_Agreement.pdf"
     p2 = SAMPLE_DIR / "Standard_Consulting_Services_Agreement.pdf"
+    p3 = SAMPLE_DIR / "India_Master_IT_Services_Agreement.pdf"
+    p4 = SAMPLE_DIR / "India_Executive_Employment_Agreement.pdf"
+    p5 = SAMPLE_DIR / "India_Mutual_Non_Disclosure_Agreement.pdf"
+    p6 = SAMPLE_DIR / "India_Commercial_Office_Lease_Agreement.pdf"
     
     if not p1.exists():
         generate_pdf("Enterprise_SaaS_Vendor_Agreement.pdf", "ENTERPRISE SAAS MASTER SUBSCRIPTION AGREEMENT", CONTRACT_1_CLAUSES)
     if not p2.exists():
         generate_pdf("Standard_Consulting_Services_Agreement.pdf", "STANDARD CONSULTING AND PROFESSIONAL SERVICES AGREEMENT", CONTRACT_2_CLAUSES)
+    if not p3.exists():
+        generate_pdf("India_Master_IT_Services_Agreement.pdf", "MASTER IT SERVICES AGREEMENT (INDIAN JURISDICTION)", CONTRACT_INDIA_IT_CLAUSES)
+    if not p4.exists():
+        generate_pdf("India_Executive_Employment_Agreement.pdf", "EXECUTIVE EMPLOYMENT & CONFIDENTIALITY AGREEMENT (INDIAN LAW)", CONTRACT_INDIA_EMPLOYMENT_CLAUSES)
+    if not p5.exists():
+        generate_pdf("India_Mutual_Non_Disclosure_Agreement.pdf", "MUTUAL NON-DISCLOSURE AGREEMENT (INDIAN CONTRACT ACT 1872)", CONTRACT_INDIA_NDA_CLAUSES)
+    if not p6.exists():
+        generate_pdf("India_Commercial_Office_Lease_Agreement.pdf", "COMMERCIAL OFFICE LEASE AGREEMENT (TRANSFER OF PROPERTY ACT 1882)", CONTRACT_INDIA_LEASE_CLAUSES)
         
-    return [p1, p2]
+    return [p1, p2, p3, p4, p5, p6]
