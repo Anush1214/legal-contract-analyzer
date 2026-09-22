@@ -2,7 +2,7 @@ import time
 import logging
 from typing import Dict, Any, Optional
 
-from backend.config import get_gemini_api_key, LLM_MODEL, MAX_AGENT_STEPS
+from backend.config import get_gemini_api_key, LLM_MODEL, MAX_AGENT_STEPS, get_llm_model
 from backend.agent.state import AgentState, EvidenceItem, ToolCallRecord
 from backend.agent.tool_registry import get_whitelisted_tools, execute_tool, is_tool_allowed
 from backend.agent.verifier import verify_citations
@@ -46,7 +46,7 @@ def run_agent_analysis(
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
         )
 
-        chat = client.chats.create(model=LLM_MODEL, config=config)
+        chat = client.chats.create(model=get_llm_model(), config=config)
 
         # Initial prompt to the agent
         initial_msg = (

@@ -1,9 +1,10 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from backend.config import RERANKER_MODEL, RERANKER_DEVICE
 from backend.retrieval.base import RetrievalResult
 
 logger = logging.getLogger("retrieval.reranker")
+_MODEL_CACHE: Dict[str, Any] = {}
 
 class CrossEncoderReranker:
     """
@@ -15,20 +16,30 @@ class CrossEncoderReranker:
     def __init__(self, model_name: str = RERANKER_MODEL, device: str = RERANKER_DEVICE):
         self.model_name = model_name
         self.device = device
-        self._model = None
         self._load_failed = False
 
     def _get_model(self):
-        if self._model is None and not self._load_failed:
+        cache_key = f"{self.model_name}::{self.device}"
+        if cache_key in _MODEL_CACHE:
+            return _MODEL_CACHE[cache_key]
+
+        if not self._load_failed:
             try:
                 from sentence_transformers import CrossEncoder
                 logger.info(f"Loading Cross-Encoder model '{self.model_name}' on device '{self.device}'...")
-                self._model = CrossEncoder(self.model_name, device=self.device)
-                logger.info("Cross-Encoder loaded successfully.")
+                try:
+                    # Attempt instant load from local HuggingFace cache (0.2s, no network call)
+                    model = CrossEncoder(self.model_name, device=self.device, local_files_only=True)
+                except Exception:
+                    # Fallback to remote download if not cached
+                    model = CrossEncoder(self.model_name, device=self.device, local_files_only=False)
+                _MODEL_CACHE[cache_key] = model
+                logger.info("Cross-Encoder loaded and cached successfully.")
+                return model
             except Exception as e:
                 logger.warning(f"Could not load Cross-Encoder '{self.model_name}': {e}. Reranking will fallback to retrieval order.")
                 self._load_failed = True
-        return self._model
+        return None
 
     def rerank(
         self,

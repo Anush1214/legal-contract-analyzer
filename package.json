@@ -1,0 +1,12 @@
+{
+  "name": "legal-contract-analyzer",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Legal Contract Analyzer - Research-Grade Legal Document Intelligence",
+  "scripts": {
+    "dev": "IF EXIST venv\\Scripts\\uvicorn.exe (venv\\Scripts\\uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload) ELSE (uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload)",
+    "start": "IF EXIST venv\\Scripts\\uvicorn.exe (venv\\Scripts\\uvicorn backend.main:app --host 127.0.0.1 --port 8000) ELSE (uvicorn backend.main:app --host 127.0.0.1 --port 8000)",
+    "test": "IF EXIST venv\\Scripts\\pytest.exe (venv\\Scripts\\pytest tests/ -v) ELSE (pytest tests/ -v)",
+    "reindex": "IF EXIST venv\\Scripts\\python.exe (venv\\Scripts\\python scripts/reindex_contracts.py) ELSE (python scripts/reindex_contracts.py)"
+  }
+}

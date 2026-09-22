@@ -19,7 +19,7 @@ EVALUATION_DIR.mkdir(parents=True, exist_ok=True)
 # LLM & Embedding Settings
 # -------------------------------------------------------------------------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.6-flash")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.7-flash")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "1536"))
 
@@ -55,3 +55,6 @@ def set_gemini_api_key(key: str) -> None:
     global GEMINI_API_KEY
     GEMINI_API_KEY = key.strip()
     os.environ["GEMINI_API_KEY"] = key.strip()
+
+def get_llm_model() -> str:
+    return os.getenv("LLM_MODEL", LLM_MODEL)

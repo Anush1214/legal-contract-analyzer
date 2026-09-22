@@ -1,7 +1,7 @@
 import time
 import logging
 from typing import Optional, Tuple, Dict, Any
-from backend.config import get_gemini_api_key, LLM_MODEL
+from backend.config import get_gemini_api_key, LLM_MODEL, get_llm_model
 from backend.generation.prompts import SYSTEM_DIRECTIVE
 
 logger = logging.getLogger("generation.llm")
@@ -9,7 +9,7 @@ logger = logging.getLogger("generation.llm")
 def call_gemini(
     prompt: str,
     system_instruction: str = SYSTEM_DIRECTIVE,
-    model_name: str = LLM_MODEL,
+    model_name: Optional[str] = None,
     temperature: float = 0.2,
     max_output_tokens: int = 2048
 ) -> Tuple[Optional[str], float, Optional[Dict[str, int]]]:
@@ -17,6 +17,7 @@ def call_gemini(
     Execute generation via the official google-genai SDK.
     Returns: (generated_text, latency_seconds, token_usage_dict)
     """
+    actual_model = model_name or get_llm_model()
     api_key = get_gemini_api_key()
     if not api_key or api_key.startswith("demo_"):
         return None, 0.0, None
@@ -34,7 +35,7 @@ def call_gemini(
         )
 
         response = client.models.generate_content(
-            model=model_name,
+            model=actual_model,
             contents=prompt,
             config=config
         )
@@ -51,5 +52,5 @@ def call_gemini(
         return response.text, latency, token_usage
     except Exception as e:
         latency = time.time() - start_time
-        logger.warning(f"Google GenAI LLM call failed for model '{model_name}': {e}")
+        logger.warning(f"Google GenAI LLM call failed for model '{actual_model}': {e}")
         return None, latency, None
